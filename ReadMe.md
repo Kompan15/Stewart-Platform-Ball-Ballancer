@@ -1,5 +1,5 @@
-Stewart Platform Ball Ballancer
-===============================
+🏐Stewart Platform Ball Ballancer 🏐
+  ===============================
 
 This is a repository containing works performed over the period of five months to create working 
 model of Stewart Platform ball ballancer. Problems encountered were not that trivial i thought 
