@@ -21,7 +21,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.08, Kd = 0.0015, Ki = 0.0000025; //wspolczynniki do kalibracji PID
+float Kp = 0.0002857, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 //odbicia lustrzane serw.
@@ -314,8 +314,8 @@ unsigned char Ustaw_Pozycje(float pe[]) {
 }
 //three functions calculating each P I D term.
 float proporcjonalny(float &a, float &b) {
-  a = Kp * (X / abs(Catch_X_DBound));
-  b = Kp * (Y / abs(Catch_Y_DBound));
+  a = Kp * (X);
+  b = Kp * (Y);
 }
 void pochodna(float &da, float &db) {
   da = Kd * (X - X1);
@@ -326,12 +326,12 @@ void calka(float &ca, float &cd) {
   float cY = Catch_Initial_Y;
   cac += (Ki) * (cX + (X - cX));
   cdc += (Ki) * (cY + (Y - cY));
-  ca = constrain(cac,-0.06,0.06);
+  ca = constrain(cac,-0.06,0.06); //wartosci sterujace sa saturowane dla bezpieczenstwa.
   cd = constrain(cdc,-0.06,0.06);
 }
 
 void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
-  float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6));
+  float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6)); //te stale to rozmiary ekranu.
   float czasY = b*(0.0197/(Catch_Y_UBound-Catch_Y_DBound))/(tt*pow(10,-6));
   if(czasX>CXmax){CXmax = czasX;}
   if(czasY>CYmax){CYmax = czasY;}
@@ -345,6 +345,12 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   }
   float czasXmax = 0, czasYmax=0;
   unsigned long time0,time1;
+  float Xa,Ya;
+
+  void licz_przyspieszenie(float a, float b){
+    Xa = 9.81*sin(a*deg2rad);
+    Ya = 9.81*sin(b*deg2rad);
+    }
 void loop()
 {
   Koordynanty(X, Y); //zdobądź koordynanty
@@ -356,13 +362,20 @@ void loop()
   calka(Catch_iX, Catch_iY);
   X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej. 
   time1 = micros()-time0;
-
-licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
+  licz_przyspieszenie(Catch_X + Catch_dX + Catch_iX,Catch_Y + Catch_dY + Catch_iY);
+//licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
   Serial.print(Catch_X);
   Serial.print("\t");
   Serial.write(",");
-  Serial.print(Catch_Y);
+  Serial.print(Catch_X);
   Serial.print("\t");
+  Serial.write(",");
+  Serial.print(Catch_dX);
+  Serial.print("\t");
+  Serial.write(",");
+  Serial.println(Catch_dY);
+
+   /*Serial.print("\t");
   Serial.write(",");
   Serial.print(Catch_dX);
   Serial.print("\t");
@@ -373,7 +386,7 @@ licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
   Serial.print(Catch_iX);
   Serial.print("\t");
   Serial.write(",");
-  Serial.println(Catch_iY);
+  Serial.println(Catch_iY);*/
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
