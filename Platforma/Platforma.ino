@@ -18,10 +18,10 @@ const int blue = 12;
 int stanPrzycisku = 0; 
 //definicje zmiennych
 int Xi = 1, Yi = 1, xDi = 0, yDi = 0; //definicje zmiennych dla ekranu i filtracji.
-float X, Y, X1, Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
-float Catch_Initial_X, Catch_Initial_Y, Catch_X_UBound, Catch_Y_UBound, Catch_X_DBound, Catch_Y_DBound;
-int Ilosc_Probek = 2; //ilosc probek na kazdej osi
-float xSu[3], ySu[3], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
+int X, Y, X1, Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
+int Catch_Initial_X, Catch_Initial_Y, Catch_X_UBound, Catch_Y_UBound, Catch_X_DBound, Catch_Y_DBound;
+int Ilosc_Probek = 4; //ilosc probek na kazdej osi
+int xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
 float Kp = 0.0002850, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
@@ -64,8 +64,8 @@ const float beta[] = { -pi / 2, pi / 2, 5 * pi / 6, -pi / 6, pi / 6, -5 * pi / 6
 //PD  - odleglosc od srodka podstawy do miejsc zaczepienia orczykow (osie serw)
 //theta_p- kat pomiedzy wektorami wskazujacymi polozenie punktow obrotu orczykow, theta_r - kat pomiedzy punktami zaczepienia snapow na platformie
 //theta_angle- zmienna pomocnicza
-//p[][]=x y koordynanty punktow rotacji
-//re[]{}=x y z koordynanty snapow platformy
+//p[][]=x y Koordynaty punktow rotacji
+//re[]{}=x y z Koordynaty snapow platformy
 //equations used for p and re will affect postion of X axis, they can be changed to achieve
 //specific X axis position
 const float RD = 102, PD = 105, theta_p = radians(50),
@@ -98,32 +98,37 @@ re[3][6] = {
 //tablice używane do rotacji.
 //H[]-wektor translacji z podstawy do platformy.
 static float M[3][3], rxp[3][6], T[3], H[3] = {0, 0, z_home};
-void Koordynanty(float &a, float &b) {
-  //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
-  //Pomiar X:
-  digitalWrite(PIN_TR, LOW);
-  digitalWrite(PIN_BR, LOW);
-  digitalWrite(PIN_TL, HIGH);
-  digitalWrite(PIN_BL, HIGH);
-  //wygładzamX
-  delay(2);
-  //filtruj mediana
-  a = analogRead(PIN_S);
-  xSum = 0;
-  Xi = 0;
-  //POMIAR Y
-  digitalWrite(PIN_TR, HIGH);
-  digitalWrite(PIN_TL, HIGH);
-  digitalWrite(PIN_BL, LOW);
-  digitalWrite(PIN_BR, LOW);
-  delay(1);
-  //wygładzamY
-    delay(2);
-  //filtruj mediana
-  b = analogRead(PIN_S);
-  ySum = 0;
-  Yi = 0;
+
+void kalibracja(int &xDBoundary, int &yDBoundary, int &xUBoundary, int &yUBoundary) {
+  float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
+  unsigned long tim = millis();
+  while (millis()-tim < 5000) {
+    digitalWrite(blue,HIGH);
+    digitalWrite(green,LOW);
+    digitalWrite(red,LOW);
+    Koordynaty(X, Y);
+    X += -Catch_Initial_X;
+    Y += -Catch_Initial_Y;
+    if (X < xMIN) {
+      xMIN = X;
+    }
+    if (X > xMAX) {
+      xMAX = X;
+    }
+    if (Y < yMIN) {
+      yMIN = Y;
+    }
+    if (Y > yMAX) {
+      yMAX = Y;
+    }
+  }
+  //przechwycenie granic układu, lepsza praca...
+  xDBoundary = xMIN;
+  yDBoundary = yMIN;
+  yUBoundary = yMAX;
+  xUBoundary = xMAX;
 }
+
 void setup() {
   //Ustawienie pinów obsługi ekranu.
   pinMode(PIN_TR, OUTPUT);
@@ -153,35 +158,63 @@ void setup() {
   //wysteruj pozycję początkową
 }
 
-void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &yUBoundary) {
-  float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
-  unsigned long tim = millis();
-  while (millis()-tim < 5000) {
-    digitalWrite(blue,HIGH);
-    digitalWrite(green,LOW);
-    digitalWrite(red,LOW);
-    Koordynanty(X, Y);
-    X += -Catch_Initial_X;
-    Y += -Catch_Initial_Y;
-    if (X < xMIN) {
-      xMIN = X;
-    }
-    if (X > xMAX) {
-      xMAX = X;
-    }
-    if (Y < yMIN) {
-      yMIN = Y;
-    }
-    if (Y > yMAX) {
-      yMAX = Y;
-    }
+void Sortuj(int a[], int n) {
+   int i, j, min, temp;
+   for (i = 0; i < n - 1; i++) {
+      min = i;
+      for (j = i + 1; j < n; j++)
+         if (a[j] < a[min])
+            min = j;
+      temp = a[i];
+      a[i] = a[min];
+      a[min] = temp;
+   }}
+  
+void Koordynaty(int &a, int &b) {
+  //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
+  //Pomiar X:
+  digitalWrite(PIN_TR, LOW);
+  digitalWrite(PIN_BR, LOW);
+  digitalWrite(PIN_TL, HIGH);
+  digitalWrite(PIN_BL, HIGH);
+  //wygładzamX
+  delay(2);
+  while (Xi <= Ilosc_Probek) {
+    delay(1);
+    xSu[Xi] = analogRead(PIN_S);
+    Xi++;
   }
-  //przechwycenie granic układu, lepsza praca...
-  xDBoundary = xMIN;
-  yDBoundary = yMIN;
-  yUBoundary = yMAX;
-  xUBoundary = xMAX;
+  //filtruj mediana
+    int m = sizeof(xSu)/ sizeof(xSu[0]);
+   Sortuj(xSu, m);
+  a = xSu[2];
+  for (int i = 0; i < m; i++){
+   Serial.print("**");
+   Serial.print(xSu[i]);}
+
+  xSum = 0;
+  Xi = 0;
+  //POMIAR Y
+  digitalWrite(PIN_TR, HIGH);
+  digitalWrite(PIN_TL, HIGH);
+  digitalWrite(PIN_BL, LOW);
+  digitalWrite(PIN_BR, LOW);
+  //wygładzamY
+  delay(2);
+  while (Yi <= Ilosc_Probek) {
+    delay(1);
+    ySu[Yi] = analogRead(PIN_S);
+    Yi++;
+  }
+  //filtruj mediana
+  int n = sizeof(ySu)/ sizeof(ySu[0]);
+   Sortuj(ySu, n);
+  b = ySu[2];
+  ySum = 0;
+  Yi = 0;
 }
+
+
 //funkcja wyliczania żądanego kąta na serwomechanizmie
 float getAlpha(int *i) {
   static int n;
@@ -193,7 +226,7 @@ float getAlpha(int *i) {
   th = theta_a[*i];
   while (n < 20) {
     //obliczenia współrzędnych połączenia pomiędzy orczykami a popychaczami.
-    q[0] = L1 * cos(th) * cos(beta[*i]) + p[0][*i]; //p[][]=x y koordynanty punktow rotacji
+    q[0] = L1 * cos(th) * cos(beta[*i]) + p[0][*i]; //p[][]=x y Koordynaty punktow rotacji
     q[1] = L1 * cos(th) * sin(beta[*i]) + p[1][*i];
     q[2] = L1 * sin(th);
     //obliczenie dystansu pomiędzy punktami zaczepienia platformy a punktami zaczepienia podstawy
@@ -239,7 +272,7 @@ void Licz_Macierz_Rotacji(float pe[])
 void Licz_Nowe_Zaczepienie(float pe[])
 {
   for (int i = 0; i < 6; i++) {
-    rxp[0][i] = T[0] + M[0][0] * (re[0][i]) + M[0][1] * (re[1][i]) + M[0][2] * (re[2][i]); //re[]{}=x y z koordynanty snapow platformy, Tutaj rozwiązywane jest równanie T+M*(re
+    rxp[0][i] = T[0] + M[0][0] * (re[0][i]) + M[0][1] * (re[1][i]) + M[0][2] * (re[2][i]); //re[]{}=x y z Koordynaty snapow platformy, Tutaj rozwiązywane jest równanie T+M*(re
     rxp[1][i] = T[1] + M[1][0] * (re[0][i]) + M[1][1] * (re[1][i]) + M[1][2] * (re[2][i]);
     rxp[2][i] = T[2] + M[2][0] * (re[0][i]) + M[2][1] * (re[1][i]) + M[2][2] * (re[2][i]);
   }
@@ -317,23 +350,19 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
       digitalWrite(blue,LOW);}
     
     }
-  void licz_przyspieszenie(float a, float b){
+  void licz_przyspieszenie(int a, int b){
     Xa = 9.81*sin(a*deg2rad);
     Ya = 9.81*sin(b*deg2rad);
     }
-  void kalibruj_tymczasowy(float &a, float &b){
+  void kalibruj_tymczasowy(int &a, int &b){
     a += -Catch_Initial_X;
     b += -Catch_Initial_Y;
     }
     unsigned long ostatni_odczyt, ostatni_odczyt_calka;
-void loop()
-{
-  stanPrzycisku = digitalRead(buttonPin);
-if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
 
-  if(millis()-ostatni_odczyt >= 20){
-    ostatni_odczyt = millis();
-      Koordynanty(X, Y); //zdobądź koordynanty
+    void Zbierz_Koordynaty_licz_PD(void){
+        
+   //zdobądź Koordynaty
   kalibruj_tymczasowy(X,Y);
   eX = X; //przechwycenie do zmiennej symbolicznej 
   eY = Y;//przechwycenie do zmiennej symbolicznej 
@@ -341,20 +370,37 @@ if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
   proporcjonalny(Catch_X, Catch_Y);
   pochodna(Catch_dX, Catch_dY);
   X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
-  eX1 = X1; eY1 = Y1;//przechwycenie do zmiennej symbolicznej 
+  eX1 = X1; eY1 = Y1;//przechwycenie do zmiennej symbolicznej
     }
-
-    if(millis()-ostatni_odczyt_calka >=50){
-      ostatni_odczyt_calka = millis();
-      calka(Catch_iX, Catch_iY);}
-    
-  wskaznik(Catch_dY,Catch_dX);
+  void Wprowadz_sterowanie(void){
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
   arr[3] = (Catch_Y + Catch_dY + Catch_iY);
   arr[4] = (Catch_X + Catch_dX + Catch_iX);
   arr[5] = radians(0);
+    }
+    
+void loop()
+{
+  stanPrzycisku = digitalRead(buttonPin);
+if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
+
+
+if(millis()-ostatni_odczyt >= 20){
+  ostatni_odczyt = millis();
+  Zbierz_Koordynaty_licz_PD();}
+    Koordynaty(X, Y);
+    if(millis()-ostatni_odczyt_calka >=50){
+      ostatni_odczyt_calka = millis();
+      calka(Catch_iX, Catch_iY);}
+
+      Serial.print(X);
+      Serial.print(", ");
+      Serial.println(Y);
+      
+  wskaznik(Catch_dY,Catch_dX);
+  Wprowadz_sterowanie();
   Ustaw_Pozycje(arr); //zmien pozycje
 }
 void Zadaj_wspolrzedne(){
@@ -363,9 +409,11 @@ void Zadaj_wspolrzedne(){
     digitalWrite(blue,HIGH);
     digitalWrite(green,LOW);
     digitalWrite(red,LOW);
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
+    unsigned long tim = millis();
+  while (millis()-tim < 60) {
+    Koordynaty(Catch_Initial_X, Catch_Initial_Y);
+  }
+  
   }
 void retPos() {
   for (int i = 0; i < 6; i++) {
