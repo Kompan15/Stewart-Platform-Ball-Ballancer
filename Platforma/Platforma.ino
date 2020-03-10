@@ -10,10 +10,28 @@
 #define MIN 800
 
 //inicjalizacja JOYA
-const int SW_pin = 2; // digital pin connected to switch output
-const int X_pin = 0; // analog pin connected to X output
-const int Y_pin = 1; // analog pin connected to Y output
+//const int SW_pin = 2; // digital pin connected to switch output
+//const int X_pin = 0; // analog pin connected to X output
+//const int Y_pin = 1; // analog pin connected to Y output
 
+//definicja pinow ekranu
+#define PIN_TR A1
+#define PIN_TL A4
+#define PIN_S  A5
+#define PIN_BL A3
+#define PIN_BR A2
+
+//definicje zmiennych dla ekranu i filtracji.
+
+int Xi = 1,Yi = 1,xDi = 0, yDi = 0;
+float X,Y,X1,Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
+int xAvg = 50,yAvg = 50;
+int Ilosc_Probek = 30; //ilosc probek na kazdej osi
+float xSu[30], ySu[30], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
+float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
+float Dx,Dy;
+
+float Catch_X, Catch_Y;
 
 //odbicia lustrzane serw.
 
@@ -134,9 +152,22 @@ static float M[3][3], rxp[3][6], T[3], H[3] = {0,0,z_home};
 
 void setup(){
 
-  pinMode(SW_pin, INPUT);
-  digitalWrite(SW_pin, HIGH);
 
+//joystick:
+  /*pinMode(SW_pin, INPUT);
+  digitalWrite(SW_pin, HIGH);
+*/
+pinMode(PIN_TR, OUTPUT);
+  pinMode(PIN_TL, OUTPUT);
+  pinMode(PIN_BL, OUTPUT);
+  pinMode(PIN_BR, OUTPUT);
+  digitalWrite(PIN_TR, LOW);
+  digitalWrite(PIN_TL, LOW);
+  digitalWrite(PIN_BL, LOW);
+  digitalWrite(PIN_BR, LOW);
+
+  pinMode(PIN_S, INPUT);
+  
 //attachment of servos to PWM digital pins of arduino
 
    servo[0].attach(3, MIN, MAX);
@@ -160,6 +191,51 @@ void setup(){
    setPos(arr);
    
 }
+
+void Koordynanty(float &a, float &b){
+
+  //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
+  //Pomiar X:
+      digitalWrite(PIN_TR, LOW);
+      digitalWrite(PIN_BR, LOW);
+      digitalWrite(PIN_TL, HIGH);
+      digitalWrite(PIN_BL, HIGH);
+      //wygładzamX
+      xSu[0] = analogRead(PIN_S);
+      while(Xi!=Ilosc_Probek){
+        xSu[Xi] = analogRead(PIN_S);
+          xSum+=xSu[Xi];
+          Xi++;
+      }
+      a = xSum/(Ilosc_Probek-1);
+      Xi = 1;
+      xSum=0; 
+      //POMIAR Y
+      digitalWrite(PIN_BL, LOW);
+      digitalWrite(PIN_BR, LOW);
+      digitalWrite(PIN_TR, HIGH);
+      digitalWrite(PIN_TL, HIGH);
+      //wygładzamY
+      ySu[0] = analogRead(PIN_S);
+      while(Yi!=Ilosc_Probek){
+        ySu[Yi] = analogRead(PIN_S);
+        ySum += ySu[Yi];
+        Yi++;
+      }
+      b = ySum/(Ilosc_Probek-1);
+      //zerowanie zmiennych do nastepnego przebiegu.
+      Yi = 1;
+      ySum=0;
+  }
+
+  void pochodna(float &da, float &db){
+    bool xReady = 0,yReady = 0;
+    while(xReady !=1 && yReady != 1){
+      if(abs(X1-X)<40 && xReady != 1){da = abs(X1-X);xReady = 1;}
+        else{break;}
+      if(abs(Y1-Y)<40 && yReady != 1){db = abs(Y1-Y);yReady = 1;}
+        else{break;}} //Break; bo mi szkoda czasu na kolejną kalkulację, po prostu ignoruję pomiar...
+    }
 
 //funkcja wyliczania żądanego kąta na serwomechanizmie
 
@@ -365,15 +441,13 @@ unsigned char setPos(float pe[]){
 void loop()
 
 {
-  Serial.print("RPX:");
-  Serial.print((analogRead(X_pin)-506)*(0.12/506));
-  Serial.print("RPY:");
-  Serial.println((analogRead(Y_pin)-506)*(0.12/506));
+  Koordynanty(X,Y);
+      
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
-arr[3] = (analogRead(X_pin)-506)*(0.12/506);
-arr[4] = (analogRead(Y_pin)-506)*(0.12/506);
+arr[3] = radians(0);
+arr[4] = radians(0);
 arr[5] = radians(0);
 setPos(arr);
 //action to change position of platform, obtain 6 values representing desired position
