@@ -5,10 +5,10 @@
 #define MIN 800
 //definicja pinow ekranu
 #define PIN_TR A1
-#define PIN_TL A4
-#define PIN_S  A5
-#define PIN_BL A3
 #define PIN_BR A2
+#define PIN_S  A3
+#define PIN_BL A4
+#define PIN_TL A5
 //definicje zmiennych
 int Xi = 1, Yi = 1, xDi = 0, yDi = 0; //definicje zmiennych dla ekranu i filtracji.
 float X, Y, X1, Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
@@ -17,12 +17,9 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-
-float Kp = 0.065, Kd = 0.0033, Ki = 0.0000023; //wspolczynniki do kalibracji PID
-
+float Kp = 0.060, Kd = 0.0032, Ki = 0.0000015; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
-
 //odbicia lustrzane serw.
 #define INV1 1
 #define INV2 3
@@ -34,7 +31,7 @@ int xTemp, yTemp; //Temporary terms to help calculate median.
 //tablica serw
 Servo servo[6];
 //pozycje zerowe serw
-static int zero[6] = {1540, 1460, 1540, 1500, 1500, 1500};
+static int zero[6] = {1500, 1500, 1500, 1500, 1500, 1500};
 //tablica przechowująca pozycję platformy
 static float arr[6] = {0, 0.0, 0, radians(0), radians(0), radians(0)};
 //Actual degree of rotation of all servo arms, they start at 0 - horizontal, used to reduce
@@ -95,58 +92,19 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_BR, LOW);
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, HIGH);
-
   //wygładzamX
   delay(2);
-  while (Xi < Ilosc_Probek) {
-    delay(1);
-    xSu[Xi] = analogRead(PIN_S);
-    Xi++;
-  }
-  //filtruj mediana
-  for (int i = 0; i < Ilosc_Probek; i++) {
-    for (int j = 0; j < Ilosc_Probek; j++) {
-      if (xSu[j] > xSu[j + 1]) {
-        xTemp = xSu[j];
-        xSu[j] = xSu[j + 1];
-        xSu[j + 1] = xTemp;
-      }
-    }
-  }
-  a = xSu[1];
-  xSum = 0;
-  Xi = 0;
+  a = analogRead(PIN_S);
   //POMIAR Y
-
   digitalWrite(PIN_TR, HIGH);
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, LOW);
   digitalWrite(PIN_BR, LOW);
   delay(2);
-  //wygładzamY
-
-  while (Yi < Ilosc_Probek) {
-    delay(1);
-    ySu[Yi] = analogRead(PIN_S);
-    Yi++;
-  }
-  //filtruj mediana
-  for (int i = 0; i < Ilosc_Probek; i++) {
-    for (int j = 0; j < Ilosc_Probek; j++) {
-      if (ySu[j] > ySu[j + 1]) {
-        yTemp = ySu[j];
-        ySu[j] = ySu[j + 1];
-        ySu[j + 1] = yTemp;
-      }
-    }
-  }
-  b = ySu[1];
-  ySum = 0;
-  Yi = 0;
-
+  //wygładzam
+  b = analogRead(PIN_S);
 }
 void setup() {
-
   //Ustawienie pinów obsługi ekranu.
   pinMode(PIN_TR, OUTPUT);
   pinMode(PIN_TL, OUTPUT);
@@ -157,7 +115,6 @@ void setup() {
   digitalWrite(PIN_BL, LOW);
   digitalWrite(PIN_BR, LOW);
   pinMode(PIN_S, INPUT);
-
   //Przyporządkowanie pinów do poszczególnych serv.
   servo[0].attach(3, MIN, MAX);
   servo[1].attach(5, MIN, MAX);
@@ -169,7 +126,6 @@ void setup() {
   Serial.begin(9600);
   //wysteruj pozycję początkową
   Ustaw_Pozycje(arr);
-
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 15;
@@ -178,13 +134,10 @@ void setup() {
   arr[5] = radians(0);
   Ustaw_Pozycje(arr); //zmien pozycje
   /*inicjalizacja punktów stabilnosci, NIE USTAWIAC GO BLIZEJ NIZ W POLOWIE ODLEGLOSCI OD SRODKA DO KRAWEDZI
-
     - dalej algorytm po prostu nie jest na tyle ogarniety.*/
-
   Koordynanty(Catch_Initial_X, Catch_Initial_Y);
   Koordynanty(Catch_Initial_X, Catch_Initial_Y);
   Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 5;
@@ -192,7 +145,6 @@ void setup() {
   arr[4] = radians(0);
   arr[5] = radians(0);
   Ustaw_Pozycje(arr); //zmien pozycje
-
   kalibracja(Catch_X_DBound, Catch_Y_DBound, Catch_X_UBound, Catch_Y_UBound);
   arr[0] = 0;
   arr[1] = 0;
@@ -204,7 +156,6 @@ void setup() {
 }
 void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &yUBoundary) {
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
-
   while (millis() < 10000) {
     Koordynanty(X, Y);
     X += -Catch_Initial_X;
@@ -227,7 +178,6 @@ void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &
   yUBoundary = yMAX;
   xUBoundary = xMAX;
 }
-
 //funkcja wyliczania żądanego kąta na serwomechanizmie
 float getAlpha(int *i) {
   static int n;
@@ -272,7 +222,6 @@ void Licz_Macierz_Rotacji(float pe[])
   float psi = pe[5];
   float theta = pe[4];
   float phi = pe[3];
-
   M[0][0] = cos(psi) * cos(theta);                           //OK pierwsza kolumna pierwszy element
   M[1][0] = -sin(psi) * cos(phi) + cos(psi) * sin(theta) * sin(phi); //OK druga kolumna pierwszy element
   M[2][0] = sin(psi) * sin(phi) + cos(psi) * cos(phi) * sin(theta); //OK trzecia kolumna pierwszy element
@@ -293,7 +242,6 @@ void Licz_Nowe_Zaczepienie(float pe[])
     rxp[2][i] = T[2] + M[2][0] * (re[0][i]) + M[2][1] * (re[1][i]) + M[2][2] * (re[2][i]);
   }
 }
-
 //Oblicz wektor translacji
 void Licz_Wektor_Translacji(float pe[])
 {
@@ -326,19 +274,15 @@ unsigned char Ustaw_Pozycje(float pe[]) {
   }
   return errorcount;
 }
-
 //three functions calculating each P I D term.
-
 float proporcjonalny(float &a, float &b) {
   a = Kp * (X / abs(Catch_X_DBound));
   b = Kp * (Y / abs(Catch_Y_DBound));
 }
-
 void pochodna(float &da, float &db) {
   da = Kd * (X - X1);
   db = Kd * (Y - Y1);
 }
-
 void calka(float &ca, float &cd) {
   float cX = Catch_Initial_X;
   float cY = Catch_Initial_Y;
@@ -356,7 +300,6 @@ void loop()
   pochodna(Catch_dX, Catch_dY);
   calka(Catch_iX, Catch_iY);
   X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
-
   Serial.print(Catch_X);
   Serial.print("\t");
   Serial.write(",");
@@ -373,9 +316,6 @@ void loop()
   Serial.print("\t");
   Serial.write(",");
   Serial.println(Catch_iY);
-
-
-
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
