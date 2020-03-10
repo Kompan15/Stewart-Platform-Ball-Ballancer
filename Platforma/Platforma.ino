@@ -59,7 +59,7 @@ const float beta[] = {-pi/2,pi/2,5*pi/6, -pi/6,pi/6,-5*pi/6},
 
 //z_home - height of platform above base, 0 is height of servo arms
 
-servo_mult=400/(pi/4),L1 = 16,L2 = 155, z_home = 137;
+servo_mult=400/(pi/4),L1 = 16,L2 = 155, z_home = 150;
 
 //RD distance from center of platform to attachment points (arm attachment point)
 
@@ -77,7 +77,7 @@ servo_mult=400/(pi/4),L1 = 16,L2 = 155, z_home = 137;
 
 //specific X axis position
 
-const float RD = 114, PD = 105, theta_p = radians(50),
+const float RD = 102, PD = 105, theta_p = radians(50),
 
 theta_angle=(pi/3-theta_p)/2, theta_r = radians(20),
 
