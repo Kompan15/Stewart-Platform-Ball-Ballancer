@@ -17,12 +17,12 @@
 int Xi = 1,Yi = 1,xDi = 0, yDi = 0;
 float X,Y,X1,Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
 int xAvg = 50,yAvg = 50;
-int Ilosc_Probek = 30; //ilosc probek na kazdej osi
-float xSu[30], ySu[30], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
+int Ilosc_Probek = 20; //ilosc probek na kazdej osi
+float xSu[20], ySu[20], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
 float Dx,Dy;
-float Kp = 0.05;
-float Catch_X, Catch_Y;
+float Kp = 0.05, Ki = 0.03;
+float Catch_X, Catch_Y, Catch_dX, Catch_dY;
 //odbicia lustrzane serw.
 #define INV1 1
 #define INV2 3
@@ -150,14 +150,7 @@ void Koordynanty(float &a, float &b){
       Yi = 1;
       ySum=0;
   }
-  void pochodna(float &da, float &db){
-    bool xReady = 0,yReady = 0;
-    while(xReady !=1 && yReady != 1){
-      if(abs(X1-X)<40 && xReady != 1){da = abs(X1-X);xReady = 1;}
-        else{break;}
-      if(abs(Y1-Y)<40 && yReady != 1){db = abs(Y1-Y);yReady = 1;}
-        else{break;}} //Break; bo mi szkoda czasu na kolejną kalkulację, po prostu ignoruję pomiar...
-    }
+  
 //funkcja wyliczania żądanego kąta na serwomechanizmie
 float getAlpha(int *i){
    static int n;
@@ -201,12 +194,13 @@ void getmatrix(float pe[])
    float psi=pe[5];
    float theta=pe[4];
    float phi=pe[3];
+   
    M[0][0] = cos(psi)*cos(theta);                             //OK pierwsza kolumna pierwszy element
    M[1][0] = -sin(psi)*cos(phi)+cos(psi)*sin(theta)*sin(phi); //OK druga kolumna pierwszy element
    M[2][0] = sin(psi)*sin(phi)+cos(psi)*cos(phi)*sin(theta);  //OK trzecia kolumna pierwszy element
    M[0][1] = sin(psi)*cos(theta);                             //OK pierwsza kolumna drugi element
    M[1][1] = cos(psi)*cos(phi)+sin(psi)*sin(theta)*sin(phi);  //OK druga kolumna drugi element
-   M[2][1] = -cos(psi)*sin(phi)+sin(psi)*sin(theta)*cos(phi);                             // OK druga kolumna, trzeci element
+   M[2][1] = -cos(psi)*sin(phi)+sin(psi)*sin(theta)*cos(phi); // OK druga kolumna, trzeci element
    M[0][2] = -sin(theta);                                     // OK pierwsza kolumna trzeci element
    M[1][2] =  cos(theta)*sin(phi);// NOK trzecia kolumna drugi element
    M[2][2] = cos(theta)*cos(phi);                             // OK trzecia kolumna trzeci element
@@ -237,7 +231,6 @@ unsigned char setPos(float pe[]){
         getmatrix(pe);
         getrxp(pe);
         theta_a[i]=getAlpha(&i);
-        
         if(i==INV1||i==INV2||i==INV3){
             servo_pos[i] = constrain(zero[i] - (theta_a[i])*servo_mult, MIN,MAX);
         }
@@ -261,26 +254,42 @@ float propX(){
   float propY(){
   return Kp*(Y/250);
   }
+ void pochodna(float &da, float &db){
+    bool xReady = 0,yReady = 0;
+    while(xReady !=1 && yReady != 1){
+      if(abs(X1-X)<2.5 && xReady != 1){da = (X1-X);xReady = 1;}
+        else{break;}
+      if(abs(Y1-Y)<2.5 && yReady != 1){db = (Y1-Y);yReady = 1;}
+        else{break;}} //Break; bo mi szkoda czasu na kolejną kalkulację, po prostu ignoruję pomiar...
+    }
 void loop()
 {
 Koordynanty(X,Y);
-X+=-500;
-Y+=-500;
-Serial.print(X-500);
-Serial.print(":");
-Serial.print(Y-500);
-Serial.print(":");
-Serial.print(propX());
-Serial.print(":");
-Serial.println(propY());
+Koordynanty(X1,Y1);
+X+=-520; X1+=-520;
+Y+=-450; Y1+=-450;
+pochodna(Catch_dX,Catch_dY);
+Serial.print(Catch_dX);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.print(X);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.print(Catch_dY);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.println(Y);
+      
+Catch_dX*=Ki;
+Catch_dY*=Ki;
+    
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
-arr[3] = propY();
-arr[4] = propX();
+arr[3] = (Catch_dY+propY());
+arr[4] = (Catch_dX+propX());
 arr[5] = radians(0);
-setPos(arr);
-//action to change position of platform, obtain 6 values representing desired position
+setPos(arr); //zmien pozycje
 }
 void retPos(){
    for(int i=0;i<6;i++){
