@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include <TimerOne.h>
 #include <Wire.h>
 //MIN/MAX serwomechanizmów.
 #define MAX 2200
@@ -9,9 +10,7 @@
 #define PIN_S  A3
 #define PIN_BL A4
 #define PIN_TL A5
-
 //setup diody RGB i przycisku przerwania.
-
 const int buttonPin = 13;     // the number of the pushbutton pin
 const int red = 7;
 const int green = 8;
@@ -28,11 +27,9 @@ float Dx, Dy;
 float Kp = 0.0002850, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
-
   //prptotypując...
   float czasXmax = 0, czasYmax=0;
   unsigned long time0,time1;
-
  //smienne symboliczne bledu.
   float Xa,Ya;
   float eX,eY,eX1,eY1;
@@ -147,44 +144,21 @@ void setup() {
   servo[5].attach(11, MIN, MAX);
   //rozpocznij komunikację
  //inicjalizacja pinów RGB i przycisku.
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(buttonPin), bibi, LOW);
   pinMode(red, OUTPUT);
   pinMode(green, OUTPUT);
   pinMode(blue, OUTPUT);
   Serial.begin(9600);
-  //wysteruj pozycję początkową
-  Ustaw_Pozycje(arr);
-  arr[0] = 0;
-  arr[1] = 0;
-  arr[2] = 15;
-  arr[3] = radians(0);
-  arr[4] = radians(0);
-  arr[5] = radians(0);
-  Ustaw_Pozycje(arr); //zmien pozycje
-  /*inicjalizacja punktów stabilnosci, NIE USTAWIAC GO BLIZEJ NIZ W POLOWIE ODLEGLOSCI OD SRODKA DO KRAWEDZI
-    - dalej algorytm po prostu nie jest na tyle ogarniety.*/
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
-  arr[0] = 0;
-  arr[1] = 0;
-  arr[2] = 5;
-  arr[3] = radians(0);
-  arr[4] = radians(0);
-  arr[5] = radians(0);
-  Ustaw_Pozycje(arr); //zmien pozycje
+
   kalibracja(Catch_X_DBound, Catch_Y_DBound, Catch_X_UBound, Catch_Y_UBound);
-  arr[0] = 0;
-  arr[1] = 0;
-  arr[2] = 0;
-  arr[3] = radians(0);
-  arr[4] = radians(0);
-  arr[5] = radians(0);
-  Ustaw_Pozycje(arr); //zmien pozycje
+  //wysteruj pozycję początkową
+  
 }
 void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &yUBoundary) {
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
-  while (millis() < 10000) {
+  unsigned long tim = millis();
+  while (millis()-tim < 10000) {
     digitalWrite(blue,HIGH);
     digitalWrite(green,LOW);
     digitalWrite(red,LOW);
@@ -308,7 +282,6 @@ unsigned char Ustaw_Pozycje(float pe[]) {
 void proporcjonalny(float &a, float &b) {
   a = constrain(Kp * eX,-0.08,0.08);
   b = constrain(Kp * eY,-0.08,0.08);}
-
 void pochodna(float &da, float &db) {
   float deX = eX-eX1;
   float deY = eY-eY1;
@@ -323,7 +296,6 @@ void calka(float &ca, float &cd) {
   cdc += cY;
   ca = constrain(cac,-0.06,0.06); //wartosci sterujace sa saturowane dla bezpieczenstwa.
   cd = constrain(cdc,-0.06,0.06);}
-
 void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6)); //te stale to rozmiary ekranu.
   float czasY = b*(0.0197/(Catch_Y_UBound-Catch_Y_DBound))/(tt*pow(10,-6));
@@ -332,14 +304,11 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   Serial.print(CXmax);
   Serial.print("\t");
   Serial.write(",");
-
   Serial.print(CYmax);
   Serial.print("\t");
   Serial.write(",");
   }
-
   void wskaznik(float a, float b){
-
     if(abs(a)>0.02 || abs(b)>0.02){
       digitalWrite(red,HIGH);
       digitalWrite(green,LOW);
@@ -350,18 +319,18 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
       digitalWrite(blue,LOW);}
     
     }
-
   void licz_przyspieszenie(float a, float b){
     Xa = 9.81*sin(a*deg2rad);
     Ya = 9.81*sin(b*deg2rad);
     }
-
   void kalibruj_tymczasowy(float &a, float &b){
     a += -Catch_Initial_X;
     b += -Catch_Initial_Y;
     }
 void loop()
 {
+  stanPrzycisku = digitalRead(buttonPin);
+if (stanPrzycisku == HIGH) { bibi();}
   Koordynanty(X, Y); //zdobądź koordynanty
   time0 = micros(); //przechwyć czas
   kalibruj_tymczasowy(X,Y);
@@ -390,7 +359,6 @@ void loop()
   Serial.print("\t");
   Serial.write(",");
   Serial.println(Catch_iY);
-
   wskaznik(Catch_dY,Catch_dX);
   arr[0] = 0;
   arr[1] = 0;
@@ -400,6 +368,17 @@ void loop()
   arr[5] = radians(0);
   Ustaw_Pozycje(arr); //zmien pozycje
 }
+
+void bibi(){
+  /*inicjalizacja punktów stabilnosci, NIE USTAWIAC GO BLIZEJ NIZ W POLOWIE ODLEGLOSCI OD SRODKA DO KRAWEDZI
+    - dalej algorytm po prostu nie jest na tyle ogarniety.*/
+    digitalWrite(blue,HIGH);
+    digitalWrite(green,LOW);
+    digitalWrite(red,LOW);
+  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
+  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
+  Koordynanty(Catch_Initial_X, Catch_Initial_Y);
+  }
 void retPos() {
   for (int i = 0; i < 6; i++) {
     long val;
