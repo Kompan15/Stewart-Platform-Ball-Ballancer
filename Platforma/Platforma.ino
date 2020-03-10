@@ -24,6 +24,14 @@ float Dx, Dy;
 float Kp = 0.0002857, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
+
+  //prptotypując...
+  float czasXmax = 0, czasYmax=0;
+  unsigned long time0,time1;
+
+ //smienne symboliczne bledu.
+  float Xa,Ya;
+  float eX,eY,eX1,eY1;
 //odbicia lustrzane serw.
 #define INV1 1
 #define INV2 3
@@ -113,7 +121,7 @@ void Koordynanty(float &a, float &b) {
       }
     }
   }
-  a = xSu[1];
+  a = xSu[2];
   xSum = 0;
   Xi = 0;
   //POMIAR Y
@@ -138,7 +146,7 @@ void Koordynanty(float &a, float &b) {
       }
     }
   }
-  b = ySu[1];
+  b = ySu[2];
   ySum = 0;
   Yi = 0;
 }
@@ -313,22 +321,23 @@ unsigned char Ustaw_Pozycje(float pe[]) {
   return errorcount;
 }
 //three functions calculating each P I D term.
-float proporcjonalny(float &a, float &b) {
-  a = Kp * (X);
-  b = Kp * (Y);
-}
+void proporcjonalny(float &a, float &b) {
+  a = constrain(Kp * eX,-0.08,0.08);
+  b = constrain(Kp * eY,-0.08,0.08);}
+
 void pochodna(float &da, float &db) {
-  da = Kd * (X - X1);
-  db = Kd * (Y - Y1);
-}
+  float deX = eX-eX1;
+  float deY = eY-eY1;
+  da = constrain(Kd * deX,-0.07,0.07);
+  db = constrain(Kd * deY,-0.07,0.07);}
+  
 void calka(float &ca, float &cd) {
-  float cX = Catch_Initial_X;
-  float cY = Catch_Initial_Y;
-  cac += (Ki) * (cX + (X - cX));
-  cdc += (Ki) * (cY + (Y - cY));
+  float cX = Ki*eX;
+  float cY = Ki*eY;
+  cac += cX; //sumowanie bledu
+  cdc += cY;
   ca = constrain(cac,-0.06,0.06); //wartosci sterujace sa saturowane dla bezpieczenstwa.
-  cd = constrain(cdc,-0.06,0.06);
-}
+  cd = constrain(cdc,-0.06,0.06);}
 
 void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6)); //te stale to rozmiary ekranu.
@@ -343,9 +352,7 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   Serial.print("\t");
   Serial.write(",");
   }
-  float czasXmax = 0, czasYmax=0;
-  unsigned long time0,time1;
-  float Xa,Ya;
+
 
   void licz_przyspieszenie(float a, float b){
     Xa = 9.81*sin(a*deg2rad);
@@ -355,38 +362,29 @@ void loop()
 {
   Koordynanty(X, Y); //zdobądź koordynanty
   time0 = micros();
-  X += -Catch_Initial_X; //zmodyfikuj o tymczasowy środek
+  X += -Catch_Initial_X; //zmodyfikuj o tymczasowy środek gdzie Catch Initial X jest wartoscia zadana.
   Y += -Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
+  eX = X; //przechwycenie do zmiennej symbolicznej 
+  eY = Y;//przechwycenie do zmiennej symbolicznej 
+  /*nastepuje wykonanie czlonow*/
   proporcjonalny(Catch_X, Catch_Y);
   pochodna(Catch_dX, Catch_dY);
   calka(Catch_iX, Catch_iY);
-  X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej. 
+  X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
+  eX1 = X1; eY1 = Y1;//przechwycenie do zmiennej symbolicznej 
   time1 = micros()-time0;
   licz_przyspieszenie(Catch_X + Catch_dX + Catch_iX,Catch_Y + Catch_dY + Catch_iY);
 //licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
   Serial.print(Catch_X);
   Serial.print("\t");
   Serial.write(",");
-  Serial.print(Catch_X);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_dX);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.println(Catch_dY);
-
-   /*Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_dX);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_dY);
+  Serial.print(Catch_Y);
   Serial.print("\t");
   Serial.write(",");
   Serial.print(Catch_iX);
   Serial.print("\t");
   Serial.write(",");
-  Serial.println(Catch_iY);*/
+  Serial.println(Catch_iY);
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
