@@ -23,7 +23,9 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
 float Dx,Dy;
-float Kp = 0.065, Kd = 0.0033, Ki = 0.0000015; //WSP PID
+
+float Kp = 0.065, Kd = 0.0033, Ki = 0.0000023; //WSP PID
+
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY; //PID
 int xTemp,yTemp;
 //odbicia lustrzane serw.
@@ -171,16 +173,41 @@ pinMode(PIN_TR, OUTPUT);
    Serial.begin(115200);
 //wysteruj pozycję początkową
    setPos(arr);
+
+  arr[0] = 0;
+  arr[1] = 0;
+  arr[2] = 15;
+  arr[3] = radians(0);
+  arr[4] = radians(0);
+  arr[5] = radians(0);
+  setPos(arr); //zmien pozycje
+  
    Koordynanty(Catch_Initial_X,Catch_Initial_Y);
    Koordynanty(Catch_Initial_X,Catch_Initial_Y);
    Koordynanty(Catch_Initial_X,Catch_Initial_Y);
+
+  arr[0] = 0;
+  arr[1] = 0;
+  arr[2] =5;
+  arr[3] = radians(0);
+  arr[4] = radians(0);
+  arr[5] = radians(0);
+  setPos(arr); //zmien pozycje
+  
   kalibracja(Catch_X_DBound,Catch_Y_DBound, Catch_X_UBound,Catch_Y_UBound);
+  arr[0] = 0;
+  arr[1] = 0;
+  arr[2] = 0;
+  arr[3] = radians(0);
+  arr[4] = radians(0);
+  arr[5] = radians(0);
+  setPos(arr); //zmien pozycje
 }
 void kalibracja(float &xDBoundary, float &yDBoundary,float &xUBoundary, float &yUBoundary){
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
   Serial.println("Start Kalibracji!");
+ 
   while(millis()<10000){
-    Serial.println(millis()/1000);
     Koordynanty(X,Y);
     X+=-Catch_Initial_X;
     Y+=-Catch_Initial_Y;
@@ -324,8 +351,8 @@ X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
       Serial.print(Catch_iX);
       Serial.print("\t");
       Serial.write(",");
-      Serial.println(Catch_iY);
-    /*  Serial.print("\t");
+      Serial.print(Catch_iY);
+      Serial.print("\t");
       Serial.write(",");
       Serial.print(Catch_dX);
       Serial.print("\t");
@@ -336,7 +363,8 @@ X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
       Serial.print(Catch_X);
       Serial.print("\t");
       Serial.write(",");
-      Serial.println(Catch_Y);*/
+      Serial.println(Catch_Y);
+      
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
