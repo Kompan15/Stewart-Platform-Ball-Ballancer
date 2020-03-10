@@ -21,7 +21,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.0002857, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
+float Kp = 0.0002857, Kd = 0.0021, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 
