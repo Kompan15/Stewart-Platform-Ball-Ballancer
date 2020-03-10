@@ -5,23 +5,27 @@
 #define MIN 800
 //definicja pinow ekranu
 #define PIN_TR A1
-
 #define PIN_BR A2
-
 #define PIN_S  A3
-
 #define PIN_BL A4
-
 #define PIN_TL A5
+
+//setup diody RGB i przycisku przerwania.
+
+const int buttonPin = 13;     // the number of the pushbutton pin
+const int red = 7;
+const int green = 8;
+const int blue = 12;
+int stanPrzycisku = 0; 
 //definicje zmiennych
 int Xi = 1, Yi = 1, xDi = 0, yDi = 0; //definicje zmiennych dla ekranu i filtracji.
 float X, Y, X1, Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
 float Catch_Initial_X, Catch_Initial_Y, Catch_X_UBound, Catch_Y_UBound, Catch_X_DBound, Catch_Y_DBound;
-int Ilosc_Probek = 4; //ilosc probek na kazdej osi
-float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
+int Ilosc_Probek = 2; //ilosc probek na kazdej osi
+float xSu[3], ySu[3], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.0002857, Kd = 0.0021, Ki = 0.0000025; //wspolczynniki do kalibracji PID
+float Kp = 0.0002850, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 
@@ -105,23 +109,9 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, HIGH);
   //wygładzamX
-  delay(1);
-  while (Xi < Ilosc_Probek) {
-    delay(1);
-    xSu[Xi] = analogRead(PIN_S);
-    Xi++;
-  }
+  delay(2);
   //filtruj mediana
-  for (int i = 0; i < Ilosc_Probek; i++) {
-    for (int j = 0; j < Ilosc_Probek; j++) {
-      if (xSu[j] > xSu[j + 1]) {
-        xTemp = xSu[j];
-        xSu[j] = xSu[j + 1];
-        xSu[j + 1] = xTemp;
-      }
-    }
-  }
-  a = xSu[2];
+  a = analogRead(PIN_S);
   xSum = 0;
   Xi = 0;
   //POMIAR Y
@@ -131,22 +121,9 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_BR, LOW);
   delay(1);
   //wygładzamY
-  while (Yi < Ilosc_Probek) {
-    delay(1);
-    ySu[Yi] = analogRead(PIN_S);
-    Yi++;
-  }
+    delay(2);
   //filtruj mediana
-  for (int i = 0; i < Ilosc_Probek; i++) {
-    for (int j = 0; j < Ilosc_Probek; j++) {
-      if (ySu[j] > ySu[j + 1]) {
-        yTemp = ySu[j];
-        ySu[j] = ySu[j + 1];
-        ySu[j + 1] = yTemp;
-      }
-    }
-  }
-  b = ySu[2];
+  b = analogRead(PIN_S);
   ySum = 0;
   Yi = 0;
 }
@@ -169,6 +146,11 @@ void setup() {
   servo[4].attach(10, MIN, MAX);
   servo[5].attach(11, MIN, MAX);
   //rozpocznij komunikację
+ //inicjalizacja pinów RGB i przycisku.
+  pinMode(buttonPin, INPUT);
+  pinMode(red, OUTPUT);
+  pinMode(green, OUTPUT);
+  pinMode(blue, OUTPUT);
   Serial.begin(9600);
   //wysteruj pozycję początkową
   Ustaw_Pozycje(arr);
@@ -203,6 +185,9 @@ void setup() {
 void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &yUBoundary) {
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
   while (millis() < 10000) {
+    digitalWrite(blue,HIGH);
+    digitalWrite(green,LOW);
+    digitalWrite(red,LOW);
     Koordynanty(X, Y);
     X += -Catch_Initial_X;
     Y += -Catch_Initial_Y;
@@ -219,6 +204,7 @@ void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &
       yMAX = Y;
     }
   }
+  //przechwycenie granic układu, lepsza praca...
   xDBoundary = xMIN;
   yDBoundary = yMIN;
   yUBoundary = yMAX;
@@ -278,8 +264,6 @@ void Licz_Macierz_Rotacji(float pe[])
   M[1][2] =  cos(theta) * sin(phi);                          //OK druga kolumna trzeci element
   M[2][2] = cos(theta) * cos(phi);                           //OK trzecia kolumna trzeci element
 }
-//calculates wanted position of platform attachment poins using calculated rotation matrix
-//and translation vector
 void Licz_Nowe_Zaczepienie(float pe[])
 {
   for (int i = 0; i < 6; i++) {
@@ -328,8 +312,9 @@ void proporcjonalny(float &a, float &b) {
 void pochodna(float &da, float &db) {
   float deX = eX-eX1;
   float deY = eY-eY1;
-  da = constrain(Kd * deX,-0.07,0.07);
-  db = constrain(Kd * deY,-0.07,0.07);}
+  da = constrain(Kd * deX,-0.05,0.05);
+  db = constrain(Kd * deY,-0.05,0.05);
+  }
   
 void calka(float &ca, float &cd) {
   float cX = Ki*eX;
@@ -353,17 +338,33 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   Serial.write(",");
   }
 
+  void wskaznik(float a, float b){
+
+    if(abs(a)>0.02 || abs(b)>0.02){
+      digitalWrite(red,HIGH);
+      digitalWrite(green,LOW);
+      digitalWrite(blue,LOW);} else 
+    {
+      digitalWrite(green,HIGH);
+      digitalWrite(red,LOW);
+      digitalWrite(blue,LOW);}
+    
+    }
 
   void licz_przyspieszenie(float a, float b){
     Xa = 9.81*sin(a*deg2rad);
     Ya = 9.81*sin(b*deg2rad);
     }
+
+  void kalibruj_tymczasowy(float &a, float &b){
+    a += -Catch_Initial_X;
+    b += -Catch_Initial_Y;
+    }
 void loop()
 {
   Koordynanty(X, Y); //zdobądź koordynanty
-  time0 = micros();
-  X += -Catch_Initial_X; //zmodyfikuj o tymczasowy środek gdzie Catch Initial X jest wartoscia zadana.
-  Y += -Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
+  time0 = micros(); //przechwyć czas
+  kalibruj_tymczasowy(X,Y);
   eX = X; //przechwycenie do zmiennej symbolicznej 
   eY = Y;//przechwycenie do zmiennej symbolicznej 
   /*nastepuje wykonanie czlonow*/
@@ -373,18 +374,24 @@ void loop()
   X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
   eX1 = X1; eY1 = Y1;//przechwycenie do zmiennej symbolicznej 
   time1 = micros()-time0;
-  licz_przyspieszenie(Catch_X + Catch_dX + Catch_iX,Catch_Y + Catch_dY + Catch_iY);
-//licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
   Serial.print(Catch_X);
   Serial.print("\t");
   Serial.write(",");
   Serial.print(Catch_Y);
   Serial.print("\t");
   Serial.write(",");
+  Serial.print(Catch_dX);
+  Serial.print("\t");
+  Serial.write(",");
+  Serial.print(Catch_dY);
+  Serial.print("\t");
+  Serial.write(",");
   Serial.print(Catch_iX);
   Serial.print("\t");
   Serial.write(",");
   Serial.println(Catch_iY);
+
+  wskaznik(Catch_dY,Catch_dX);
   arr[0] = 0;
   arr[1] = 0;
   arr[2] = 0;
