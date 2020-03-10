@@ -23,7 +23,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
 float Dx,Dy;
-float Kp = 0.06, Ki = 0.09; //WSP PID
+float Kp = 0.065, Ki = 0.09; //WSP PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY; //PID
 int xTemp,yTemp;
 //odbicia lustrzane serw.
@@ -91,131 +91,59 @@ theta_angle=(pi/3-theta_p)/2, theta_r = radians(8),
 //tablice używane do rotacji.
 //H[]-wektor translacji z podstawy do platformy.
 static float M[3][3], rxp[3][6], T[3], H[3] = {0,0,z_home};
-
 void Koordynanty(float &a, float &b){
-
-
-
   //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
-
-
-
   //Pomiar X:
-
-
-
        digitalWrite(PIN_TR, LOW);
-
       digitalWrite(PIN_BR, LOW);
-
       digitalWrite(PIN_TL, HIGH);
-
       digitalWrite(PIN_BL, HIGH);
-
       //wygładzamX
-
       delay(2);
-
-
-
         while(Xi<Ilosc_Probek){
-
           delay(1);
-
           xSu[Xi] = analogRead(PIN_S);
-
           Xi++;
-
         }
-
-
-
         //filtruj mediana
-
         for(int i=0;i<Ilosc_Probek; i++){
-
           for(int j=0;j<Ilosc_Probek;j++){
-
             if(xSu[j]>xSu[j+1]){
-
             xTemp = xSu[j];
-
             xSu[j]=xSu[j+1];
-
             xSu[j+1] = xTemp;}
-
             }
-
           }
-
         a = xSu[1];
-
         xSum = 0;
-
         Xi = 0;
-
-
-
       //POMIAR Y
-
       
-
        digitalWrite(PIN_TR, HIGH);
-
       digitalWrite(PIN_TL, HIGH);
-
       digitalWrite(PIN_BL, LOW);
-
       digitalWrite(PIN_BR, LOW);
-
       delay(2);
-
-
-
       //wygładzamY
-
       
-
     while(Yi<Ilosc_Probek){
-
             delay(1);
-
         ySu[Yi] = analogRead(PIN_S);
-
           Yi++;
-
         }
-
-
-
         //filtruj mediana
-
-
-
         for(int i=0;i<Ilosc_Probek; i++){
-
           for(int j=0;j<Ilosc_Probek;j++){
-
             if(ySu[j]>ySu[j+1]){
-
             yTemp = ySu[j];
-
             ySu[j]=ySu[j+1];
-
             ySu[j+1] = yTemp;}
-
             }
-
           }
-
  b = ySu[1];
-
        ySum = 0;
-
        Yi = 0;
-
       
-
   }
 void setup(){
 //joystick:
@@ -240,7 +168,7 @@ pinMode(PIN_TR, OUTPUT);
    servo[4].attach(10, MIN, MAX);
    servo[5].attach(11, MIN, MAX);
 //rozpocznij komunikację
-   Serial.begin(9600);
+   Serial.begin(115200);
 //wysteruj pozycję początkową
    setPos(arr);
    Koordynanty(Catch_Initial_X,Catch_Initial_Y);
@@ -248,7 +176,6 @@ pinMode(PIN_TR, OUTPUT);
    Koordynanty(Catch_Initial_X,Catch_Initial_Y);
   kalibracja(Catch_X_DBound,Catch_Y_DBound, Catch_X_UBound,Catch_Y_UBound);
 }
-
 void kalibracja(float &xDBoundary, float &yDBoundary,float &xUBoundary, float &yUBoundary){
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
   Serial.println("Start Kalibracji!");
@@ -365,14 +292,11 @@ unsigned char setPos(float pe[]){
     }
     return errorcount;
 }
-
-
 //main control loop, obtain requested action from serial connection, then execute it
 float proporcjonalny(float &a, float &b){
   a = Kp*(X/abs(Catch_X_DBound));
   b = Kp*(Y/abs(Catch_Y_DBound));
   }
-
   
  void pochodna(float &da, float &db){
  
@@ -382,13 +306,11 @@ float proporcjonalny(float &a, float &b){
     
 void loop()
 {
-
 Koordynanty(X,Y); //zdobądź koordynanty
 X+=-Catch_Initial_X; //zmodyfikuj
 Y+=-Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
 proporcjonalny(Catch_X,Catch_Y);
 pochodna(Catch_dX,Catch_dY);
-
 X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
      
          /* Serial.print(X);
@@ -400,20 +322,7 @@ X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
       Serial.print(X);
       Serial.print("\t");
       Serial.write(",");
-      Serial.print(Y);
-      Serial.print("\t");
-      Serial.write(",");
-      Serial.print(Catch_dX);
-      Serial.print("\t");
-      Serial.write(",");
-      Serial.print(Catch_dY);
-      Serial.print("\t");
-      Serial.write(",");
-      Serial.print(Catch_X);
-      Serial.print("\t");
-      Serial.write(",");
-      Serial.println(Catch_Y);
-
+      Serial.println(Y);
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
