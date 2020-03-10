@@ -5,9 +5,13 @@
 #define MIN 800
 //definicja pinow ekranu
 #define PIN_TR A1
+
 #define PIN_BR A2
+
 #define PIN_S  A3
+
 #define PIN_BL A4
+
 #define PIN_TL A5
 //definicje zmiennych
 int Xi = 1, Yi = 1, xDi = 0, yDi = 0; //definicje zmiennych dla ekranu i filtracji.
@@ -17,7 +21,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.060, Kd = 0.0032, Ki = 0.0000015; //wspolczynniki do kalibracji PID
+float Kp = 0.065, Kd = 0.0022, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 //odbicia lustrzane serw.
@@ -31,7 +35,7 @@ int xTemp, yTemp; //Temporary terms to help calculate median.
 //tablica serw
 Servo servo[6];
 //pozycje zerowe serw
-static int zero[6] = {1500, 1500, 1500, 1500, 1500, 1500};
+static int zero[6] = {1540, 1460, 1540, 1500, 1500, 1500};
 //tablica przechowująca pozycję platformy
 static float arr[6] = {0, 0.0, 0, radians(0), radians(0), radians(0)};
 //Actual degree of rotation of all servo arms, they start at 0 - horizontal, used to reduce
@@ -94,15 +98,49 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_BL, HIGH);
   //wygładzamX
   delay(2);
-  a = analogRead(PIN_S);
+  while (Xi < Ilosc_Probek) {
+    delay(1);
+    xSu[Xi] = analogRead(PIN_S);
+    Xi++;
+  }
+  //filtruj mediana
+  for (int i = 0; i < Ilosc_Probek; i++) {
+    for (int j = 0; j < Ilosc_Probek; j++) {
+      if (xSu[j] > xSu[j + 1]) {
+        xTemp = xSu[j];
+        xSu[j] = xSu[j + 1];
+        xSu[j + 1] = xTemp;
+      }
+    }
+  }
+  a = xSu[1];
+  xSum = 0;
+  Xi = 0;
   //POMIAR Y
   digitalWrite(PIN_TR, HIGH);
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, LOW);
   digitalWrite(PIN_BR, LOW);
   delay(2);
-  //wygładzam
-  b = analogRead(PIN_S);
+  //wygładzamY
+  while (Yi < Ilosc_Probek) {
+    delay(1);
+    ySu[Yi] = analogRead(PIN_S);
+    Yi++;
+  }
+  //filtruj mediana
+  for (int i = 0; i < Ilosc_Probek; i++) {
+    for (int j = 0; j < Ilosc_Probek; j++) {
+      if (ySu[j] > ySu[j + 1]) {
+        yTemp = ySu[j];
+        ySu[j] = ySu[j + 1];
+        ySu[j + 1] = yTemp;
+      }
+    }
+  }
+  b = ySu[1];
+  ySum = 0;
+  Yi = 0;
 }
 void setup() {
   //Ustawienie pinów obsługi ekranu.
