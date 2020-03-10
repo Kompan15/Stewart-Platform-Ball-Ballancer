@@ -45,60 +45,35 @@ int xTemp, yTemp; //Temporary terms to help calculate median.
 Servo servo[6];
 //pozycje zerowe serw
 static int zero[6] = {1540, 1460, 1540, 1500, 1500, 1500};
-//tablica przechowująca pozycję platformy
-static float arr[6] = {0, 0.0, 0, radians(0), radians(0), radians(0)};
-//Actual degree of rotation of all servo arms, they start at 0 - horizontal, used to reduce
+static float arr[6] = {0, 0.0, 0, radians(0), radians(0), radians(0)}; //tablica przechowująca pozycję platformy
 //complexity of calculating new degree of rotation
 static float theta_a[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 //Tablica aktualnych pozycji każdego z serw.
 static int servo_pos[6];
 //rotacje ramion serwomachanizmów w stosunku do osi x
-const float beta[] = { -pi / 2, pi / 2, 5 * pi / 6, -pi / 6, pi / 6, -5 * pi / 6},
-                     //maksymalne dozwolone ruchy serw - bezpieczenstwo przede wszystkim.
+const float beta[] = { -pi / 2, pi / 2, 5 * pi / 6, -pi / 6, pi / 6, -5 * pi / 6}, //maksymalne dozwolone ruchy serw - bezpieczenstwo przede wszystkim.
+                     
                      servo_min = radians(-70), servo_max = radians(70),
                      //servo_mult - mnożnik konwertujący radiany->puls dla zadanego kąta.
                      //L1-długość ramienia serwa, L2 - długość popychacza + Snapy w [mm]
-                     //z_home - height of platform above base, 0 is height of servo arms
-                     servo_mult = 400 / (pi / 4), L1 = 16, L2 = 155, z_home = 150;
-//RD - odległość od środka platformy do snapów
+                     //H_Platformy - height of platform above base, 0 is height of servo arms
+                     servo_mult = 400 / (pi / 4), L1 = 16, L2 = 155, H_Platformy = 150;
+//Snap_platforma - odległość od środka platformy do snapów
 //PD  - odleglosc od srodka podstawy do miejsc zaczepienia orczykow (osie serw)
-//theta_p- kat pomiedzy wektorami wskazujacymi polozenie punktow obrotu orczykow, theta_r - kat pomiedzy punktami zaczepienia snapow na platformie
+//Kat_Waly_Podstawy- kat pomiedzy wektorami wskazujacymi polozenie punktow obrotu orczykow, Kat_Snapy_Platformy - kat pomiedzy punktami zaczepienia snapow na platformie
 //theta_angle- zmienna pomocnicza
 //p[][]=x y Koordynaty punktow rotacji
 //re[]{}=x y z Koordynaty snapow platformy
 //equations used for p and re will affect postion of X axis, they can be changed to achieve
 //specific X axis position
-const float RD = 102, PD = 105, theta_p = radians(50),
-            theta_angle = (pi / 3 - theta_p) / 2, theta_r = radians(8),
-p[2][6] = {
-  {
-    -PD * cos(deg30 - theta_angle), -PD * cos(deg30 - theta_angle),
-    PD * sin(theta_angle), PD * cos(deg30 + theta_angle),
-    PD * cos(deg30 + theta_angle), PD * sin(theta_angle)
-  },
-  {
-    -PD * sin(deg30 - theta_angle), PD * sin(deg30 - theta_angle),
-    PD * cos(theta_angle), PD * sin(deg30 + theta_angle),
-    -PD * sin(deg30 + theta_angle), -PD * cos(theta_angle)
-  }
-},
-re[3][6] = {
-  {
-    -RD * sin(deg30 + theta_r / 2), -RD * sin(deg30 + theta_r / 2),
-    -RD * sin(deg30 - theta_r / 2), RD * cos(theta_r / 2),
-    RD * cos(theta_r / 2), -RD * sin(deg30 - theta_r / 2),
-  }, {
-    -RD * cos(deg30 + theta_r / 2), RD * cos(deg30 + theta_r / 2),
-    RD * cos(deg30 - theta_r / 2), RD * sin(theta_r / 2),
-    -RD * sin(theta_r / 2), -RD * cos(deg30 - theta_r / 2),
-  }, {
-    0, 0, 0, 0, 0, 0
-  }
-};
-//tablice używane do rotacji.
+const float Snap_platforma = 102, Koord_wal = 105, Kat_Waly_Podstawy = radians(50),
+            theta_angle = (pi / 3 - Kat_Waly_Podstawy) / 2, Kat_Snapy_Platformy = radians(8),
+            
+p[2][6] = {{-98, -98, 10, 89, 89, 10},{ -46, 46, 108, 62, -62, -105}},
+  
+re[3][6] = {{-67, -67, -33, 98,  98, -33,}, {-76,  76,  95, 18, -18, -95,}, {  0,   0,   0,  0,   0,   0}};
 //H[]-wektor translacji z podstawy do platformy.
-static float M[3][3], rxp[3][6], T[3], H[3] = {0, 0, z_home};
-
+static float M[3][3], rxp[3][6], T[3], H[3] = {0, 0, H_Platformy};
 void kalibracja(int &xDBoundary, int &yDBoundary, int &xUBoundary, int &yUBoundary) {
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
   unsigned long tim = millis();
@@ -128,7 +103,6 @@ void kalibracja(int &xDBoundary, int &yDBoundary, int &xUBoundary, int &yUBounda
   yUBoundary = yMAX;
   xUBoundary = xMAX;
 }
-
 void setup() {
   //Ustawienie pinów obsługi ekranu.
   pinMode(PIN_TR, OUTPUT);
@@ -157,7 +131,6 @@ void setup() {
   kalibracja(Catch_X_DBound, Catch_Y_DBound, Catch_X_UBound, Catch_Y_UBound);
   //wysteruj pozycję początkową
 }
-
 void Sortuj(int a[], int n) {
    int i, j, min, temp;
    for (i = 0; i < n - 1; i++) {
@@ -191,7 +164,6 @@ void Koordynaty(int &a, int &b) {
   for (int i = 0; i < m; i++){
    Serial.print("**");
    Serial.print(xSu[i]);}
-
   xSum = 0;
   Xi = 0;
   //POMIAR Y
@@ -213,8 +185,6 @@ void Koordynaty(int &a, int &b) {
   ySum = 0;
   Yi = 0;
 }
-
-
 //funkcja wyliczania żądanego kąta na serwomechanizmie
 float getAlpha(int *i) {
   static int n;
@@ -359,7 +329,6 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
     b += -Catch_Initial_Y;
     }
     unsigned long ostatni_odczyt, ostatni_odczyt_calka;
-
     void Zbierz_Koordynaty_licz_PD(void){
         
    //zdobądź Koordynaty
@@ -383,10 +352,8 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
     
 void loop()
 {
-  stanPrzycisku = digitalRead(buttonPin);
+stanPrzycisku = digitalRead(buttonPin);
 if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
-
-
 if(millis()-ostatni_odczyt >= 20){
   ostatni_odczyt = millis();
   Zbierz_Koordynaty_licz_PD();}
@@ -394,7 +361,6 @@ if(millis()-ostatni_odczyt >= 20){
     if(millis()-ostatni_odczyt_calka >=50){
       ostatni_odczyt_calka = millis();
       calka(Catch_iX, Catch_iY);}
-
       Serial.print(X);
       Serial.print(", ");
       Serial.println(Y);
@@ -415,18 +381,3 @@ void Zadaj_wspolrzedne(){
   }
   
   }
-void retPos() {
-  for (int i = 0; i < 6; i++) {
-    long val;
-    if (i < 3) {
-      val = (long)(arr[i] * 100 * 25.4);
-    } else {
-      val = (long)(arr[i] * 100 * deg2rad);
-    }
-    Serial.write(val);
-    Serial.write((val >> 8));
-    Serial.write((val >> 16));
-    Serial.write((val >> 24));
-    Serial.flush();
-  }
-}
