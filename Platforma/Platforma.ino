@@ -145,20 +145,18 @@ void setup() {
   //rozpocznij komunikację
  //inicjalizacja pinów RGB i przycisku.
   pinMode(buttonPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(buttonPin), bibi, LOW);
   pinMode(red, OUTPUT);
   pinMode(green, OUTPUT);
   pinMode(blue, OUTPUT);
   Serial.begin(9600);
-
   kalibracja(Catch_X_DBound, Catch_Y_DBound, Catch_X_UBound, Catch_Y_UBound);
   //wysteruj pozycję początkową
-  
 }
+
 void kalibracja(float &xDBoundary, float &yDBoundary, float &xUBoundary, float &yUBoundary) {
   float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
   unsigned long tim = millis();
-  while (millis()-tim < 10000) {
+  while (millis()-tim < 5000) {
     digitalWrite(blue,HIGH);
     digitalWrite(green,LOW);
     digitalWrite(red,LOW);
@@ -207,7 +205,7 @@ float getAlpha(int *i) {
     if (abs(L2 - dl2) < 0.01) {
       return th;
     }
-    //if not, we split the searched space in half, then try next value
+   //jeżeli nie, dzielę pozostałą część przez dwa i liczę dalej.
     if (dl2 < L2) {
       max = th;
     } else {
@@ -327,38 +325,29 @@ void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
     a += -Catch_Initial_X;
     b += -Catch_Initial_Y;
     }
+    unsigned long ostatni_odczyt, ostatni_odczyt_calka;
 void loop()
 {
   stanPrzycisku = digitalRead(buttonPin);
-if (stanPrzycisku == HIGH) { bibi();}
-  Koordynanty(X, Y); //zdobądź koordynanty
-  time0 = micros(); //przechwyć czas
+if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
+
+  if(millis()-ostatni_odczyt >= 20){
+    ostatni_odczyt = millis();
+      Koordynanty(X, Y); //zdobądź koordynanty
   kalibruj_tymczasowy(X,Y);
   eX = X; //przechwycenie do zmiennej symbolicznej 
   eY = Y;//przechwycenie do zmiennej symbolicznej 
   /*nastepuje wykonanie czlonow*/
   proporcjonalny(Catch_X, Catch_Y);
   pochodna(Catch_dX, Catch_dY);
-  calka(Catch_iX, Catch_iY);
   X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
   eX1 = X1; eY1 = Y1;//przechwycenie do zmiennej symbolicznej 
-  time1 = micros()-time0;
-  Serial.print(Catch_X);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_Y);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_dX);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_dY);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.print(Catch_iX);
-  Serial.print("\t");
-  Serial.write(",");
-  Serial.println(Catch_iY);
+    }
+
+    if(millis()-ostatni_odczyt_calka >=50){
+      ostatni_odczyt_calka = millis();
+      calka(Catch_iX, Catch_iY);}
+    
   wskaznik(Catch_dY,Catch_dX);
   arr[0] = 0;
   arr[1] = 0;
@@ -368,8 +357,7 @@ if (stanPrzycisku == HIGH) { bibi();}
   arr[5] = radians(0);
   Ustaw_Pozycje(arr); //zmien pozycje
 }
-
-void bibi(){
+void Zadaj_wspolrzedne(){
   /*inicjalizacja punktów stabilnosci, NIE USTAWIAC GO BLIZEJ NIZ W POLOWIE ODLEGLOSCI OD SRODKA DO KRAWEDZI
     - dalej algorytm po prostu nie jest na tyle ogarniety.*/
     digitalWrite(blue,HIGH);
