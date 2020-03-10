@@ -21,7 +21,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.065, Kd = 0.0022, Ki = 0.0000025; //wspolczynniki do kalibracji PID
+float Kp = 0.08, Kd = 0.0015, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //PID Out terms.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 //odbicia lustrzane serw.
@@ -97,7 +97,7 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, HIGH);
   //wygładzamX
-  delay(2);
+  delay(1);
   while (Xi < Ilosc_Probek) {
     delay(1);
     xSu[Xi] = analogRead(PIN_S);
@@ -121,7 +121,7 @@ void Koordynanty(float &a, float &b) {
   digitalWrite(PIN_TL, HIGH);
   digitalWrite(PIN_BL, LOW);
   digitalWrite(PIN_BR, LOW);
-  delay(2);
+  delay(1);
   //wygładzamY
   while (Yi < Ilosc_Probek) {
     delay(1);
@@ -296,7 +296,7 @@ unsigned char Ustaw_Pozycje(float pe[]) {
     Licz_Macierz_Rotacji(pe);
     Licz_Nowe_Zaczepienie(pe);
     theta_a[i] = getAlpha(&i);
-    if (i == INV1 || i == INV2 || i == INV3) {
+    if (i == INV1 || i == INV2 || i == INV3) { //Bierz pod uwage orientacje serwa.
       servo_pos[i] = constrain(zero[i] - (theta_a[i]) * servo_mult, MIN, MAX);
     }
     else {
@@ -329,15 +329,35 @@ void calka(float &ca, float &cd) {
   ca = constrain(cac,-0.06,0.06);
   cd = constrain(cdc,-0.06,0.06);
 }
+
+void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
+  float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6));
+  float czasY = b*(0.0197/(Catch_Y_UBound-Catch_Y_DBound))/(tt*pow(10,-6));
+  if(czasX>CXmax){CXmax = czasX;}
+  if(czasY>CYmax){CYmax = czasY;}
+  Serial.print(CXmax);
+  Serial.print("\t");
+  Serial.write(",");
+
+  Serial.print(CYmax);
+  Serial.print("\t");
+  Serial.write(",");
+  }
+  float czasXmax = 0, czasYmax=0;
+  unsigned long time0,time1;
 void loop()
 {
   Koordynanty(X, Y); //zdobądź koordynanty
+  time0 = micros();
   X += -Catch_Initial_X; //zmodyfikuj o tymczasowy środek
   Y += -Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
   proporcjonalny(Catch_X, Catch_Y);
   pochodna(Catch_dX, Catch_dY);
   calka(Catch_iX, Catch_iY);
-  X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
+  X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej. 
+  time1 = micros()-time0;
+
+licz_szybkosc(Catch_dX,Catch_dY,time1,czasXmax,czasYmax);
   Serial.print(Catch_X);
   Serial.print("\t");
   Serial.write(",");
