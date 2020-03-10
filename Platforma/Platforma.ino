@@ -23,7 +23,7 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 int xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX, dY;
 float Dx, Dy;
-float Kp = 0.0002850, Kd = 0.0018, Ki = 0.0000025; //wspolczynniki do kalibracji PID
+float Kp = 0.0003, Kd = 0.002, Ki = 0.0000025; //wspolczynniki do kalibracji PID
 float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY, cac,cdc; //Wyjście łańcucha sumacyjnego.
 int xTemp, yTemp; //Temporary terms to help calculate median.
 //prptotypując...
@@ -50,7 +50,6 @@ static float Kat_Orczyka[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; //kąt domyslny, d
 static int Puls_Na_Pozycji[6];
 //rotacje ramion serwomachanizmów w stosunku do osi x
 const float beta[] = { -pi / 2, pi / 2, 5 * pi / 6, -pi / 6, pi / 6, -5 * pi / 6}, //maksymalne dozwolone ruchy serw - bezpieczenstwo przede wszystkim.
-
 Serwo_Minimum = radians(-70), Serwo_Maksimum = radians(70),
 //Orczyk-długość ramienia serwa, Popychacz - długość popychacza + Snapy w [mm]
 //H_Platformy - height of platform above base, 0 is height of servo arms
@@ -65,9 +64,7 @@ Mnoznik = 400 / (pi / 4), Orczyk = 16, Popychacz= 155, H_Platformy = 150; // mm
 //specific X axis position
 const float Snap_platforma = 102, Koord_wal = 105, Kat_Waly_Podstawy = radians(50),
 Kat_Konstrukcyjny = (pi / 3 - Kat_Waly_Podstawy) / 2, Kat_Snapy_Platformy = radians(8),
-
 Koord_Wal[2][6] = {{-98, -98, 10, 89, 89, 10},{ -46, 46, 108, 62, -62, -105}},
-
 Koord_Snap[3][6] = {{-67, -67, -33, 98,  98, -33,}, {-76,  76,  95, 18, -18, -95,}, {  0,   0,   0,  0,   0,   0}};
 //H[]-wektor translacji z podstawy do platformy.
 static float Macierz_Rot[3][3], rxp[3][6], H[3] = {0, 0, H_Platformy};
@@ -137,7 +134,6 @@ void Sortuj(int a[], int n) {
     a[i] = a[min];
     a[min] = temp;
   }}
-
 void Koordynaty(int &a, int &b) {
   //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
   //Pomiar X:
@@ -189,7 +185,7 @@ float getAlpha(int *i) {
   double max = Serwo_Maksimum;
   n = 0;
   Przechwyc_Alfa = Kat_Orczyka[*i];
-  while (n < 10) {
+  while (n < 20) {
     //obliczenia współrzędnych połączenia pomiędzy orczykami a popychaczami.
     q[0] = Orczyk * cos(Przechwyc_Alfa) * cos(beta[*i]) + Koord_Wal[0][*i]; //Koord_Wal[][]=x y Koordynaty punktow rotacji
     q[1] = Orczyk * cos(Przechwyc_Alfa) * sin(beta[*i]) + Koord_Wal[1][*i];
@@ -217,8 +213,6 @@ float getAlpha(int *i) {
   }
   return Przechwyc_Alfa;
 }
-
-
 unsigned char Ustaw_Pozycje(float Poz[]) {
   unsigned char errorcount;
   errorcount = 0;
@@ -269,7 +263,6 @@ void pochodna(float &da, float &db) {
   da = constrain(Kd * deX,-0.05,0.05);
   db = constrain(Kd * deY,-0.05,0.05);
 }
-
 void calka(float &ca, float &cd) {
   float cX = Ki*eX;
   float cY = Ki*eY;
@@ -277,7 +270,6 @@ void calka(float &ca, float &cd) {
   cdc += cY;
   ca = constrain(cac,-0.06,0.06); //wartosci sterujace sa saturowane dla bezpieczenstwa.
   cd = constrain(cdc,-0.06,0.06);}
-
 void licz_szybkosc(float a,float b,unsigned long tt,float &CXmax,float &CYmax){
   float czasX = a*(0.0346/(Catch_X_UBound-Catch_X_DBound))/(tt*pow(10,-6)); //te stale to rozmiary ekranu.
   float czasY = b*(0.0197/(Catch_Y_UBound-Catch_Y_DBound))/(tt*pow(10,-6));
@@ -330,22 +322,13 @@ void Wprowadz_sterowanie(void){
   Pozycja[4] = (Catch_X + Catch_dX + Catch_iX);
   Pozycja[5] = radians(0);
 }
-
 void loop()
 {
   stanPrzycisku = digitalRead(buttonPin);
   if (stanPrzycisku == HIGH) { Zadaj_wspolrzedne();}
-  if(millis()-ostatni_odczyt >= 20){
-    ostatni_odczyt = millis();
-    Zbierz_Koordynaty_licz_PD();}
+    Zbierz_Koordynaty_licz_PD();
   Koordynaty(X, Y);
-  if(millis()-ostatni_odczyt_calka >=50){
-    ostatni_odczyt_calka = millis();
-    calka(Catch_iX, Catch_iY);}
-  Serial.print(X);
-  Serial.print(", ");
-  Serial.println(Y);
-  
+    calka(Catch_iX, Catch_iY);
   wskaznik(Catch_dY,Catch_dX);
   Wprowadz_sterowanie();
   Ustaw_Pozycje(Pozycja); //zmien pozycje
