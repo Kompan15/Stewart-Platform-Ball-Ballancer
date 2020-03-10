@@ -23,8 +23,8 @@ int Ilosc_Probek = 4; //ilosc probek na kazdej osi
 float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
 float Dx,Dy;
-float Kp = 0.065, Ki = 0.09; //WSP PID
-float Catch_X, Catch_Y, Catch_dX, Catch_dY; //PID
+float Kp = 0.065, Kd = 0.0033, Ki = 0.0000015; //WSP PID
+float Catch_X, Catch_Y, Catch_dX, Catch_dY, Catch_iX, Catch_iY; //PID
 int xTemp,yTemp;
 //odbicia lustrzane serw.
 #define INV1 1
@@ -293,6 +293,7 @@ unsigned char setPos(float pe[]){
     return errorcount;
 }
 //main control loop, obtain requested action from serial connection, then execute it
+
 float proporcjonalny(float &a, float &b){
   a = Kp*(X/abs(Catch_X_DBound));
   b = Kp*(Y/abs(Catch_Y_DBound));
@@ -300,10 +301,16 @@ float proporcjonalny(float &a, float &b){
   
  void pochodna(float &da, float &db){
  
-      da = Ki*(X-X1)/27;
-      db = Ki*(Y-Y1)/27;
+      da = Kd*(X-X1);
+      db = Kd*(Y-Y1);
 } 
-    
+
+ void calka(float &ca, float &cd){
+  float cX = Catch_Initial_X;
+  float cY = Catch_Initial_Y;
+      ca += (Ki)*(cX+(X-cX));
+      cd += (Ki)*(cY+(Y-cY));
+  }
 void loop()
 {
 Koordynanty(X,Y); //zdobądź koordynanty
@@ -311,23 +318,30 @@ X+=-Catch_Initial_X; //zmodyfikuj
 Y+=-Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
 proporcjonalny(Catch_X,Catch_Y);
 pochodna(Catch_dX,Catch_dY);
+calka(Catch_iX,Catch_iY);
 X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
      
-         /* Serial.print(X);
+      Serial.print(Catch_iX);
       Serial.print("\t");
       Serial.write(",");
-      Serial.print(X1);
-      Serial.print("\t");
-      Serial.write(",");*/
-      Serial.print(X);
+      Serial.println(Catch_iY);
+    /*  Serial.print("\t");
+      Serial.write(",");
+      Serial.print(Catch_dX);
       Serial.print("\t");
       Serial.write(",");
-      Serial.println(Y);
+      Serial.print(Catch_dY);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.print(Catch_X);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.println(Catch_Y);*/
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
-arr[3] = (Catch_Y+Catch_dY);
-arr[4] = (Catch_X+Catch_dX);
+arr[3] = (Catch_Y+Catch_dY+Catch_iY);
+arr[4] = (Catch_X+Catch_dX+Catch_iX);
 arr[5] = radians(0);
 setPos(arr); //zmien pozycje
 }
