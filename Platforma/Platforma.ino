@@ -16,13 +16,16 @@
 //definicje zmiennych dla ekranu i filtracji.
 int Xi = 1,Yi = 1,xDi = 0, yDi = 0;
 float X,Y,X1,Y1; //zmienne przechowujące ostateczne współrzędne, już po wygładzeniu.
+float Catch_Initial_X,Catch_Initial_Y, Catch_X_UBound, Catch_Y_UBound, Catch_X_DBound, Catch_Y_DBound;
+bool CatchXY=0;
 int xAvg = 50,yAvg = 50;
-int Ilosc_Probek = 20; //ilosc probek na kazdej osi
-float xSu[20], ySu[20], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
+int Ilosc_Probek = 4; //ilosc probek na kazdej osi
+float xSu[5], ySu[5], xSum, ySum; //xSum i ySum podzielone przez ilość próbek dają w ostateczności przyzwoicie wygładzony sygnał.
 float dX,dY; //Przechowuje pochodną 50próbek-50 próbek
 float Dx,Dy;
-float Kp = 0.05, Ki = 0.03;
-float Catch_X, Catch_Y, Catch_dX, Catch_dY;
+float Kp = 0.06, Ki = 0.09; //WSP PID
+float Catch_X, Catch_Y, Catch_dX, Catch_dY; //PID
+int xTemp,yTemp;
 //odbicia lustrzane serw.
 #define INV1 1
 #define INV2 3
@@ -34,7 +37,7 @@ float Catch_X, Catch_Y, Catch_dX, Catch_dY;
 //tablica serw
 Servo servo[6];
 //pozycje zerowe serw
-static int zero[6]={1570,1420,1460,1460,1560,1500};
+static int zero[6]={1540,1460,1540,1500,1500,1500};
 //tablica przechowująca pozycję platformy
 static float arr[6]={0,0.0,0, radians(0),radians(0),radians(0)};
 //Actual degree of rotation of all servo arms, they start at 0 - horizontal, used to reduce
@@ -88,6 +91,132 @@ theta_angle=(pi/3-theta_p)/2, theta_r = radians(8),
 //tablice używane do rotacji.
 //H[]-wektor translacji z podstawy do platformy.
 static float M[3][3], rxp[3][6], T[3], H[3] = {0,0,z_home};
+
+void Koordynanty(float &a, float &b){
+
+
+
+  //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
+
+
+
+  //Pomiar X:
+
+
+
+       digitalWrite(PIN_TR, LOW);
+
+      digitalWrite(PIN_BR, LOW);
+
+      digitalWrite(PIN_TL, HIGH);
+
+      digitalWrite(PIN_BL, HIGH);
+
+      //wygładzamX
+
+      delay(2);
+
+
+
+        while(Xi<Ilosc_Probek){
+
+          delay(1);
+
+          xSu[Xi] = analogRead(PIN_S);
+
+          Xi++;
+
+        }
+
+
+
+        //filtruj mediana
+
+        for(int i=0;i<Ilosc_Probek; i++){
+
+          for(int j=0;j<Ilosc_Probek;j++){
+
+            if(xSu[j]>xSu[j+1]){
+
+            xTemp = xSu[j];
+
+            xSu[j]=xSu[j+1];
+
+            xSu[j+1] = xTemp;}
+
+            }
+
+          }
+
+        a = xSu[1];
+
+        xSum = 0;
+
+        Xi = 0;
+
+
+
+      //POMIAR Y
+
+      
+
+       digitalWrite(PIN_TR, HIGH);
+
+      digitalWrite(PIN_TL, HIGH);
+
+      digitalWrite(PIN_BL, LOW);
+
+      digitalWrite(PIN_BR, LOW);
+
+      delay(2);
+
+
+
+      //wygładzamY
+
+      
+
+    while(Yi<Ilosc_Probek){
+
+            delay(1);
+
+        ySu[Yi] = analogRead(PIN_S);
+
+          Yi++;
+
+        }
+
+
+
+        //filtruj mediana
+
+
+
+        for(int i=0;i<Ilosc_Probek; i++){
+
+          for(int j=0;j<Ilosc_Probek;j++){
+
+            if(ySu[j]>ySu[j+1]){
+
+            yTemp = ySu[j];
+
+            ySu[j]=ySu[j+1];
+
+            ySu[j+1] = yTemp;}
+
+            }
+
+          }
+
+ b = ySu[1];
+
+       ySum = 0;
+
+       Yi = 0;
+
+      
+
+  }
 void setup(){
 //joystick:
   /*pinMode(SW_pin, INPUT);
@@ -114,41 +243,30 @@ pinMode(PIN_TR, OUTPUT);
    Serial.begin(9600);
 //wysteruj pozycję początkową
    setPos(arr);
-   
+   Koordynanty(Catch_Initial_X,Catch_Initial_Y);
+   Koordynanty(Catch_Initial_X,Catch_Initial_Y);
+   Koordynanty(Catch_Initial_X,Catch_Initial_Y);
+  kalibracja(Catch_X_DBound,Catch_Y_DBound, Catch_X_UBound,Catch_Y_UBound);
 }
-void Koordynanty(float &a, float &b){
-  //zgodnie z algorytmem działania, ustawiam odpowiednie piny na stan wysoki - patrz do dziennika pokładowego (zielona ramka)
-  //Pomiar X:
-      digitalWrite(PIN_TR, LOW);
-      digitalWrite(PIN_BR, LOW);
-      digitalWrite(PIN_TL, HIGH);
-      digitalWrite(PIN_BL, HIGH);
-      //wygładzamX
-      xSu[0] = analogRead(PIN_S);
-      while(Xi!=Ilosc_Probek){
-        xSu[Xi] = analogRead(PIN_S);
-          xSum+=xSu[Xi];
-          Xi++;
-      }
-      a = xSum/(Ilosc_Probek-1);
-      Xi = 1;
-      xSum=0; 
-      //POMIAR Y
-      digitalWrite(PIN_BL, LOW);
-      digitalWrite(PIN_BR, LOW);
-      digitalWrite(PIN_TR, HIGH);
-      digitalWrite(PIN_TL, HIGH);
-      //wygładzamY
-      ySu[0] = analogRead(PIN_S);
-      while(Yi!=Ilosc_Probek){
-        ySu[Yi] = analogRead(PIN_S);
-        ySum += ySu[Yi];
-        Yi++;
-      }
-      b = ySum/(Ilosc_Probek-1);
-      //zerowanie zmiennych do nastepnego przebiegu.
-      Yi = 1;
-      ySum=0;
+
+void kalibracja(float &xDBoundary, float &yDBoundary,float &xUBoundary, float &yUBoundary){
+  float xMIN = 500, yMIN = 500, yMAX = 0, xMAX = 0;
+  Serial.println("Start Kalibracji!");
+  while(millis()<10000){
+    Serial.println(millis()/1000);
+    Koordynanty(X,Y);
+    X+=-Catch_Initial_X;
+    Y+=-Catch_Initial_Y;
+    if(X<xMIN){xMIN = X;}
+    if(X>xMAX){xMAX = X;}
+    if(Y<yMIN){yMIN = Y;}
+    if(Y>yMAX){yMAX = Y;}
+    } 
+    xDBoundary = xMIN;
+    yDBoundary = yMIN;
+    yUBoundary = yMAX;
+    xUBoundary = xMAX;
+    Serial.println("SKONCZYLEM LICZYC GRANICE! KONIEC KALIBRACJI");
   }
   
 //funkcja wyliczania żądanego kąta na serwomechanizmie
@@ -247,47 +365,60 @@ unsigned char setPos(float pe[]){
     }
     return errorcount;
 }
+
+
 //main control loop, obtain requested action from serial connection, then execute it
-float propX(){
-  return Kp*(X/230);
+float proporcjonalny(float &a, float &b){
+  a = Kp*(X/abs(Catch_X_DBound));
+  b = Kp*(Y/abs(Catch_Y_DBound));
   }
-  float propY(){
-  return Kp*(Y/250);
-  }
+
+  
  void pochodna(float &da, float &db){
-    bool xReady = 0,yReady = 0;
-    while(xReady !=1 && yReady != 1){
-      if(abs(X1-X)<2.5 && xReady != 1){da = (X1-X);xReady = 1;}
-        else{break;}
-      if(abs(Y1-Y)<2.5 && yReady != 1){db = (Y1-Y);yReady = 1;}
-        else{break;}} //Break; bo mi szkoda czasu na kolejną kalkulację, po prostu ignoruję pomiar...
-    }
+ 
+      da = Ki*(X-X1)/27;
+      db = Ki*(Y-Y1)/27;
+} 
+    
 void loop()
 {
-Koordynanty(X,Y);
-Koordynanty(X1,Y1);
-X+=-520; X1+=-520;
-Y+=-450; Y1+=-450;
+
+Koordynanty(X,Y); //zdobądź koordynanty
+X+=-Catch_Initial_X; //zmodyfikuj
+Y+=-Catch_Initial_Y; //zmodyfikuj o tymczasowy środek
+proporcjonalny(Catch_X,Catch_Y);
 pochodna(Catch_dX,Catch_dY);
-Serial.print(Catch_dX);
+
+X1 = X; Y1 = Y; //zbieram wartosc dla pochodnej.
+     
+         /* Serial.print(X);
       Serial.print("\t");
       Serial.write(",");
+      Serial.print(X1);
+      Serial.print("\t");
+      Serial.write(",");*/
       Serial.print(X);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.print(Y);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.print(Catch_dX);
       Serial.print("\t");
       Serial.write(",");
       Serial.print(Catch_dY);
       Serial.print("\t");
       Serial.write(",");
-      Serial.println(Y);
-      
-Catch_dX*=Ki;
-Catch_dY*=Ki;
-    
+      Serial.print(Catch_X);
+      Serial.print("\t");
+      Serial.write(",");
+      Serial.println(Catch_Y);
+
 arr[0] = 0;
 arr[1] = 0;
 arr[2] = 0;
-arr[3] = (Catch_dY+propY());
-arr[4] = (Catch_dX+propX());
+arr[3] = (Catch_Y+Catch_dY);
+arr[4] = (Catch_X+Catch_dX);
 arr[5] = radians(0);
 setPos(arr); //zmien pozycje
 }
