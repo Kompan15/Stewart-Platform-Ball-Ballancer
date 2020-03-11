@@ -7,7 +7,7 @@ they would be, but eventually i was figuring them out on my own while doing a lo
 testing. The process of creating this project would go like this:
 
 	1. Concept - I saw this really cool balancing platform, i wander if i can do the same on my 
-	own without help.
+	own.
 
 	2. Two Crappy prototypes not yet implementing Stewart Platform (SP) kinematics - i can go 
 	into details here on demand, but i don't think it's worth it.
