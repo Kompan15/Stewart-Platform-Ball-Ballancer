@@ -6,10 +6,10 @@ model of Stewart Platform ball ballancer. Problems encountered were not that tri
 they would be, but eventually i was figuring them out on my own while doing a lot of thinking and 
 testing. The process of creating this project would go like this:
 
-1.Concept - I saw this really cool balancing platform, i wander if i can do the same on my 
+1. Concept - I saw this really cool balancing platform, i wander if i can do the same on my 
 own without help.
 
-2.Two Crappy prototypes not yet implementing Stewart Platform (SP) kinematics - i can go 
+2. Two Crappy prototypes not yet implementing Stewart Platform (SP) kinematics - i can go 
 into details here on demand, but i don't think it's worth it.
 
 3.Stewart platform kinematics implemented into device geometry. I had to spend a lot of 
