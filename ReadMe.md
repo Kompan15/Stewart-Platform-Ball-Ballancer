@@ -42,7 +42,7 @@ testing. The process of creating this project would go like this:
 	in the shape rotated 45degree clockwise letter "S".
 	
 <p align="center">
-![test image size](https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png){:height="50%" width="50%"}
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png" alt="alt text" width="50%" height="50%">
 </p>
 
 
