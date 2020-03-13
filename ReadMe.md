@@ -71,8 +71,11 @@ testing. The process of creating this project would go like this:
 	of change. D deals with fast changes in signal, what results in really impressive 
 	system reaction to input.
 		
+<p align="center">
 	
 ![Stewart_Platform](https://i.imgur.com/8plFr77.gif)
+
+</p>
 
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
