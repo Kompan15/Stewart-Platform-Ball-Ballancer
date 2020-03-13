@@ -1,7 +1,9 @@
+
 <p align="center">
 	
 💣 Stewart Platform Ball Ballancer 💣
    ===============================
+   
 </p>
 
 This is a repository containing works performed over the period of five months to create working 
