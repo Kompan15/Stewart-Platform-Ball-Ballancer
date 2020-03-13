@@ -39,7 +39,9 @@ testing. The process of creating this project would go like this:
 	coordinates and later on discover that it's not sufficient condition to get them. Data  
 	i was collecting (XY coordinates) didn't make any sense and even i was making physically 
 	straight line, the output was showing beautiful and undesirable grapth
-	in the shape rotated 45degree clockwise letter "S". After few days of thinking and not 
+	in the shape rotated 45degree clockwise letter "S".
+	![alt text](https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/Annotation%202020-0313%20131735.jpg"Logo Title Text 1")
+	After few days of thinking and not 
 	having much time to work on the project i have read somewhere about parasitic capacitances
 	and it was on spot, applying 3ms read delay gives them enough time to discharge to give me 
 	a proper read.  
