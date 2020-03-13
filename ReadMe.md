@@ -27,7 +27,7 @@ testing. The process of creating this project would go like this:
 <img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="40%" height="40%">
 </p>
 	
-	5.Here's where fun begins, once having kinematics in place, you can just plug joystick
+	5.Here's where fun begins, once having kinematics in place you can just plug joystick
 	of your choice and play with ROLL & PITCH variables which are being converted by inverse 
 	kinematics algorithm into Servos positions. Being a bit concerned about time management
 	i used servo.h library, its not going to change the fact that you should know how PWM 
