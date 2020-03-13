@@ -21,6 +21,11 @@ testing. The process of creating this project would go like this:
 	to be implemented and how tricky it would get to create detailed vector model that won't 
 	make my really strong servos ripp spherical joints apart. So yeah, you need to have 
 	decently precise measurments of your geometry to be in the buisness.
+
+
+<p align="center">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="50%" height="50%">
+</p>
 	
 	5.Here's where fun begins, once having kinematics in place, you can just plug joystick
 	of your choice and play with ROLL & PITCH variables which are being converted by inverse 
