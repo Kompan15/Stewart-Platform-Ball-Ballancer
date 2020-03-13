@@ -20,7 +20,7 @@ testing. The process of creating this project would go like this:
 	4.While having fun in the workshop and wood tools i didn't think much about kinematics
 	to be implemented and how tricky it would get to create detailed vector model that won't 
 	make my really strong servos ripp spherical joints apart. So yeah, you need to have 
-	decently precise measurments of your geometry to be in the buisness.
+	decently precise measurments of your geometry to be in the business.
 
 
 <p align="center">
