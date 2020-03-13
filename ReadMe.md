@@ -72,7 +72,9 @@ testing. The process of creating this project would go like this:
 	system reaction to input.
 
 <p align="center">
+	
 ![Alt Text](https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif)
+
 </p>
 
 
