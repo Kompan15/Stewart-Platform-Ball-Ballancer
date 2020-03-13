@@ -41,7 +41,7 @@ testing. The process of creating this project would go like this:
 	straight line, the output was showing beautiful and undesirable grapth
 	in the shape rotated 45degree clockwise letter "S".
 	
-![alt text](https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/Annotation%202020-0313%20131735.jpg "LogoTitle Text 1")
+![alt text](https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png "LogoTitle Text 1")
 	
 	After few days of thinking and not 
 	having much time to work on the project i have read somewhere about parasitic capacitances
