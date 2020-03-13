@@ -24,7 +24,7 @@ testing. The process of creating this project would go like this:
 
 
 <p align="center">
-<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="50%" height="50%">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="40%" height="40%">
 </p>
 	
 	5.Here's where fun begins, once having kinematics in place, you can just plug joystick
