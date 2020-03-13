@@ -80,7 +80,7 @@ testing. The process of creating this project would go like this:
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
 	error) and out their sum into roll and pitch. For some systems you can use zigler-nichols 
-	method for example. Or if you have system transfer function - matlab.	
+	method for example Or matlab if you have system transfer function.	
 	
 	for sure i forgot to mention 60% of stuff so sorry for that, i am writing this over 6 
 	months after having my thesis defended.
