@@ -72,7 +72,7 @@ testing. The process of creating this project would go like this:
 	system reaction to input.
 
 
-![Alt Text](source.gif)
+![](source.gif)
 
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
