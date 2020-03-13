@@ -48,7 +48,7 @@ testing. The process of creating this project would go like this:
 	in the shape rotated 45degree clockwise letter "S".
 	
 <p align="center">
-<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png" alt="alt text" width="50%" height="50%">
+![Alt Text](https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif)
 </p>
 
 
@@ -71,7 +71,11 @@ testing. The process of creating this project would go like this:
 	of change. D deals with fast changes in signal, what results in really impressive 
 	system reaction to input.
 
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+
+<p align="center">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="50%" height="50%">
+</p>
+
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
 	error) and out their sum into roll and pitch. For some systems you can use zigler-nichols 
