@@ -72,7 +72,7 @@ testing. The process of creating this project would go like this:
 	system reaction to input.
 
 <p align="center">
-https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif
+<iframe src="https://giphy.com/embed/h7RP6K7aQ81SqSPShp" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/h7RP6K7aQ81SqSPShp">via GIPHY</a></p>
 </p>
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
