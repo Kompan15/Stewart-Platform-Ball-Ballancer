@@ -1,5 +1,7 @@
+<p align="center">
 💣 Stewart Platform Ball Ballancer 💣
    ===============================
+</p>
 
 This is a repository containing works performed over the period of five months to create working 
 model of Stewart Platform ball ballancer. Problems encountered were not that trivial i thought 
@@ -43,7 +45,7 @@ testing. The process of creating this project would go like this:
 	
 <p align="center">
 <img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png" alt="alt text" width="50%" height="50%">
-</p>
+
 
 
 	
