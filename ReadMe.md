@@ -72,10 +72,8 @@ testing. The process of creating this project would go like this:
 	system reaction to input.
 		
 <p align="center">
-	
-![Stewart_Platform](https://i.imgur.com/8plFr77.gif)
 
-<img src="https://i.imgur.com/8plFr77.gif">
+<img src="https://i.imgur.com/8plFr77.gif" width="50%" height="50%">
 
 </p>
 
