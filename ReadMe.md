@@ -71,9 +71,7 @@ testing. The process of creating this project would go like this:
 	of change. D deals with fast changes in signal, what results in really impressive 
 	system reaction to input.
 
-<p align="center">
-<iframe src="https://giphy.com/embed/h7RP6K7aQ81SqSPShp" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/h7RP6K7aQ81SqSPShp">via GIPHY</a></p>
-</p>
+![](name-of-giphy.gif)
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
 	error) and out their sum into roll and pitch. For some systems you can use zigler-nichols 
