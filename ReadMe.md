@@ -75,6 +75,8 @@ testing. The process of creating this project would go like this:
 	
 ![Stewart_Platform](https://i.imgur.com/8plFr77.gif)
 
+<img src="https://i.imgur.com/8plFr77.gif">
+
 </p>
 
 
