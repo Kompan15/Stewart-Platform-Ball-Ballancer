@@ -72,7 +72,7 @@ testing. The process of creating this project would go like this:
 	system reaction to input.
 
 
-![](source.gif)
+![](https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif)
 
 
 	10. I took each PID term, multiply it by some coefficient (i got them by trial and 
