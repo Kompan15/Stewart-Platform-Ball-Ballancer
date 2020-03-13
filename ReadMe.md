@@ -47,10 +47,10 @@ testing. The process of creating this project would go like this:
 	straight line, the output was showing beautiful and undesirable grapth
 	in the shape rotated 45degree clockwise letter "S".
 	
-<p align="center">
-![Alt Text](https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif)
-</p>
 
+<p align="center">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png" alt="alt text" width="50%" height="50%">
+</p>
 
 	
 	After few days of thinking and not having much time to work on the project i have read
@@ -71,9 +71,8 @@ testing. The process of creating this project would go like this:
 	of change. D deals with fast changes in signal, what results in really impressive 
 	system reaction to input.
 
-
 <p align="center">
-<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/geometriaf.png" alt="alt text" width="50%" height="50%">
+![Alt Text](https://media.giphy.com/media/h7RP6K7aQ81SqSPShp/giphy.gif)
 </p>
 
 
