@@ -60,7 +60,7 @@ testing. The process of creating this project would go like this:
 
 	8.I placed touch panel on my precious SP and was in the business. Every automatics 
 	engineer will tell you that proportional controll is not going to take you far when 
-	dealing with more complex and delicate dynamic systems, i had to go for over 100 houndred 
+	dealing with more complex and delicate dynamic systems, i had to go for over 100 hundred 
 	years old idea called PID controll.
 
 	9. PID (Proportional - Integral - Derrivative) can be described as a sum of three terms
