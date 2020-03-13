@@ -44,8 +44,8 @@ testing. The process of creating this project would go like this:
 	to them (yes, i didn't have it). First i had to figure out the algorithm behind reading 
 	coordinates and later on discover that it's not sufficient condition to get them. Data  
 	i was collecting (XY coordinates) didn't make any sense and even i was making physically 
-	straight line, the output was showing beautiful and undesirable grapth
-	in the shape rotated 45degree clockwise letter "S".
+	straight line, the output was showing beautiful however undesirable graph
+	shaped like rotated 45degree clockwise letter "S".
 	
 
 <p align="center">
