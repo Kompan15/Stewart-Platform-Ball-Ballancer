@@ -42,13 +42,10 @@ testing. The process of creating this project would go like this:
 	in the shape rotated 45degree clockwise letter "S".
 	
 <p align="center">
-  <b>Some Links:</b><br>
-  <a href="#">Link 1</a> 
-  <a href="#">Link 2</a> 
-  <a href="#">Link 3</a>
-  <br><br>
-  <img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png">
+![test image size](https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/delay%2C%20no%20delay.png){:height="50%" width="50%"}
 </p>
+
+
 	
 	After few days of thinking and not 
 	having much time to work on the project i have read somewhere about parasitic capacitances
