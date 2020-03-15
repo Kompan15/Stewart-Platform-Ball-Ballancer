@@ -32,6 +32,13 @@ testing. The process of creating this project would go like this:
 	kinematics algorithm into Servos positions. Being a bit concerned about time management
 	i used servo.h library, its not going to change the fact that you should know how PWM 
 	works! This is also a place that i thought is the tip of the hill i am on - false.
+	
+	6.To be able to actuate six arms required by geometry of the platform (you can achieve 
+	the same with only two if you are resourcefull enough) you need at least equal number
+	of Pulse Width Modulation (PWM) hardware outputs embedded in your microcomtroller/processor.
+	I've used M328P, it has enough PWM pins, and its fast to prototype and sent code to it
+	as arduino is using the same. The thing i don't like about the lattest is that's pretty big
+	so i choose to shrinken it a bit:
 
 	6.Having my superpowers of providing pitch and roll i started to think how to make it 
 	listen to my 15" resistive touch panel which came from china after more than month of 
