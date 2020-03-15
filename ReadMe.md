@@ -55,8 +55,7 @@ testing. The process of creating this project would go like this:
 	
 	After few days of thinking and not having much time to work on the project i have read
 	somewhere about parasitic capacitances and it was on spot, applying 3ms read delay gives
-	them enough time to discharge to give me 
-	a proper read.  
+	them enough time to discharge to give me a proper read.  
 
 	8.I placed touch panel on my precious SP and was in the business. Every automatics 
 	engineer will tell you that proportional controll is not going to take you far when 
