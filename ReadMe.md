@@ -41,7 +41,7 @@ testing. The process of creating this project would go like this:
 	so i choose to shrinken it a bit.
 
 <p align="center">
-<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/Plytka%20.png" alt="alt text" width="50%" height="50%">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/PRT.jpg" alt="alt text" width="50%" height="50%">
 </p>
 
 	6.Having my superpowers of providing pitch and roll i started to think how to make it 
