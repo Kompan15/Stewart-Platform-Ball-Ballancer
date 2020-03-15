@@ -46,7 +46,7 @@ testing. The process of creating this project would go like this:
 
 	6.Having my superpowers of providing pitch and roll i started to think how to make it 
 	listen to my 15" resistive touch panel which came from china after more than month of 
-	waiting (3/4 of this time was laying in the polish customs office). The task seems quite 
+	waiting (3/4 of this time was laying in the polish customs office). The task seemed quite 
 	easy: i have two angles and a 15" plane, lets just treat it as a xy coordinate system and 
 	feed them into the inverse kinematic algorithm, this idea is called a proportional 
 	controll.
