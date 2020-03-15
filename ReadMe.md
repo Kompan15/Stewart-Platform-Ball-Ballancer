@@ -38,7 +38,11 @@ testing. The process of creating this project would go like this:
 	of Pulse Width Modulation (PWM) hardware outputs embedded in your microcomtroller/processor.
 	I've used M328P, it has enough PWM pins, and its fast to prototype and sent code to it
 	as arduino is using the same. The thing i don't like about the lattest is that's pretty big
-	so i choose to shrinken it a bit:
+	so i choose to shrinken it a bit.
+
+<p align="center">
+<img src="https://github.com/Kompan15/Stewart-Platform-Ball-Ballancer/blob/master/Pictures/Plytka%20.png" alt="alt text" width="50%" height="50%">
+</p>
 
 	6.Having my superpowers of providing pitch and roll i started to think how to make it 
 	listen to my 15" resistive touch panel which came from china after more than month of 
