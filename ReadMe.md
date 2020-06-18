@@ -14,8 +14,7 @@ testing. The process of creating this project would go like this:
 	into details here on demand, but i don't think it's worth it.
 
 	3.Stewart platform kinematics implemented into device geometry. I had to spend a lot of 
-	time in the workshop trying to get perfect wooden hexagons (DON'T TELL ME I COULD 3D PRINT 
-	IT :) )
+	time in the workshop trying to get perfect wooden hexagons (i should 3d print them)
 	
 	4.While having fun in the workshop and wood tools i didn't think much about kinematics
 	to be implemented and how tricky it would get to create detailed vector model that won't 
