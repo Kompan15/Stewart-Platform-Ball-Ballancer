@@ -34,7 +34,7 @@ works! This is also a place that i thought is the tip of the hill i am on - fals
 	
 6.To be able to actuate six arms required by geometry of the platform (you can achieve 
 the same with only two if you are resourcefull enough) you need at least equal number
-of Pulse Width Modulation (PWM) hardware outputs embedded in your microcomtroller/processor.
+of Pulse Width Modulation (PWM) hardware outputs embedded in your microcontroller/processor.
 I've used M328P, it has enough PWM pins, and its fast to prototype and sent code to it
 as arduino is using the same. The thing i don't like about the lattest is being pretty big
 so i chose to shrinken it a bit.
