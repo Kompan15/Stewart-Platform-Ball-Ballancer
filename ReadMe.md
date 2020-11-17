@@ -74,10 +74,10 @@ years old idea called PID controll.
 
 9. PID (Proportional - Integral - Derrivative) can be described as a sum of three terms
 each describing a diferent signal characteristic.
-	a) P is responsible for Proportional control signal change
+	a) P is responsible for Proportional control signal change.
 	b) I takes care of integrating a static error existing after P and D stop working.
-	c) D Derrivative (my favourite) deals with fast changes and represents signal rate 
-	of change. D deals with fast changes in signal, what results in really impressive 
+	c) D Derrivative (my favourite) deals with fast changes and represents signal rate.
+	of change. D deals with fast changes in signal, what results in really impressive.
 	system reaction.
 		
 <p align="center">
