@@ -7,10 +7,10 @@ model of Stewart Platform ball ballancer. Problems encountered were not that tri
 they would be, but eventually i was figuring them out on my own while doing a lot of thinking and 
 testing. The process of creating this project would go like this:
 
-1. Concept - I saw this really cool balancing table, i wonder if i can do similiar on my 
+1. Concept - I saw this really cool balancing table, i wonder if I can do similiar on my 
 own.
 
-2. Two Crappy prototypes not yet implementing Stewart Platform (SP) kinematics - i can go 
+2. Two Crappy prototypes not yet implementing Stewart Platform (SP) kinematics - I can go 
 into details here on demand, but i don't think it's worth it.
 
 3. Stewart platform kinematics implemented into device geometry. I had to spend a lot of 
@@ -63,7 +63,7 @@ shaped like rotated 45degree clockwise letter "S".
 </p>
 
 	
-After few days of thinking and not having much time to work on the project i have read
+After few days of thinking and not having much time to work on the project I have read
 somewhere about stray capacitance, applying 3ms read delay gives
 them enough time to discharge to give me a proper read.  
 
