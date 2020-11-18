@@ -87,7 +87,7 @@ each describing a diferent signal characteristic:
 </p>
 
 
-10. I took each PID term, multiply it by some coefficient (i got them by trial and 
+10. I took each PID term, multiplied it by some coefficient (i got them by trial and 
 error) and out their sum into roll and pitch. For some systems you can use zigler-nichols 
 method for example Or matlab if you have system transfer function.	
 	
