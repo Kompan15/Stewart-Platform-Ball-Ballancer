@@ -76,7 +76,7 @@ years old idea called PID controll.
 each describing a diferent signal characteristic:
 	- P is responsible for Proportional control signal change.
 	- I takes care of integrating a static error existing after P and D stop working.
-	- D Derrivative (my favourite) deals with fast changes and represents signal rate.
+	- D Derrivative (my favourite) deals with fast changes and represents signal rate
 	of change. D deals with fast changes in signal, what results in really impressive.
 	system reaction.
 		
