@@ -67,8 +67,8 @@ After few days of thinking and not having much time to work on the project i hav
 somewhere about stray capacitance, applying 3ms read delay gives
 them enough time to discharge to give me a proper read.  
 
-9.I placed touch panel on my precious SP and was in the business. Every automatics 
-engineer will tell you that proportional controll is not going to take you far when 
+9. I placed touch panel on my precious SP. Every automatics 
+engineer will tell you that proportional control is not going to take you far when 
 dealing with more complex and delicate dynamic systems, i had to go for over 100 hundred 
 years old idea called PID controll.
 
